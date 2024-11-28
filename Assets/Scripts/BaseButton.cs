@@ -26,7 +26,7 @@ public class BaseButton : Button, IPointerEnterHandler, IPointerExitHandler
     private Image markerAssetReference;
 
     [Header("Enbiggen Settings")]
-    private Enbiggener enbiggenerComponent;
+    protected Enbiggener enbiggenerComponent;
 
     [Header("Bubble Descriptor Settings")]
     [SerializeField]
@@ -82,11 +82,17 @@ public class BaseButton : Button, IPointerEnterHandler, IPointerExitHandler
     protected bool buttonIsPressed = false;
 
     protected RectTransform thisRectTransform; 
-    public void EnableSemSagaButton(bool enabled)
+    public void EnableButton()
     {
         if (!enabled && Array.Exists(this.hoverTypes, hoverType => hoverType == EHoverType.BUBBLE_DESCRIPTOR))
             this.DeleteBubbleDescriptor();
-        this.interactable = enabled;
+        this.interactable = true;
+    }
+    public void DisableButton()
+    {
+        if (!enabled && Array.Exists(this.hoverTypes, hoverType => hoverType == EHoverType.BUBBLE_DESCRIPTOR))
+            this.DeleteBubbleDescriptor();
+        this.interactable = false;
     }
     public override void OnPointerEnter(PointerEventData eventData)
     {
@@ -251,26 +257,22 @@ public class BaseButton : Button, IPointerEnterHandler, IPointerExitHandler
         if (!this.buttonIsPressed && this.interactable)
             this.PerformPointerExit();
     }
-    protected virtual void OnClicked()
+    protected virtual void PerformClick()
     {
-        if (this.interactable)
-        {
+        if(this.enbiggenerComponent && Array.Exists(this.hoverTypes, hoverType => hoverType == EHoverType.ENBIGGEN))
             this.enbiggenerComponent.ResetSize();
 
-            switch (this.buttonType)
-            {
-                case EButtonType.NEEDS_CONFIRM:
-                    this.buttonIsPressed = true;
-                    break;
-                case EButtonType.NO_CONFIRM:
-                    this.buttonIsPressed = false;
-                    break;
-            }
-            if (this.newSpritePressed) this.targetGraphic.GetComponent<Image>().sprite = this.newSpritePressed;
-            if (this.clickSFX != null) this.clickSFX.Play();
-
-            this.onClick.Invoke();
+        switch (this.buttonType)
+        {
+            case EButtonType.NEEDS_CONFIRM:
+                this.buttonIsPressed = true;
+                break;
+            case EButtonType.NO_CONFIRM:
+                this.buttonIsPressed = false;
+                break;
         }
+        if (this.newSpritePressed) this.targetGraphic.GetComponent<Image>().sprite = this.newSpritePressed;
+        if (this.clickSFX != null) this.clickSFX.Play();
     }
     public virtual void ResetButton()
     {
@@ -278,6 +280,7 @@ public class BaseButton : Button, IPointerEnterHandler, IPointerExitHandler
 
         if (this.newSpriteDefault)
             this.targetGraphic.GetComponent<Image>().sprite = this.newSpriteDefault;
+
         this.enbiggenerComponent.ResetSize();
     }
     protected virtual void InitializeBubbleDescriptor()
@@ -286,8 +289,9 @@ public class BaseButton : Button, IPointerEnterHandler, IPointerExitHandler
         if (this.bubbleText == "")
             this.bubbleText = this.name.Replace(omittedString, "");
     }
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         this.bubbleBorder = Resources.Load<GameObject>("Prefabs/UI/Bubble Template").GetComponent<Image>();
         this.thisRectTransform = this.GetComponent<RectTransform>();
         this.enbiggenerComponent = this.GetComponent<Enbiggener>();
@@ -297,15 +301,13 @@ public class BaseButton : Button, IPointerEnterHandler, IPointerExitHandler
         if (!this.newSpriteDefault)
             this.newSpriteDefault = this.targetGraphic.GetComponent<Image>().sprite;
 
+        this.onClick.AddListener(this.PerformClick);
 
         if (this.buttonWidth == 0)
-        {
             this.buttonWidth = 75.0f;
-        }
+        
         if (this.buttonHeight == 0)
-        {
             this.buttonHeight = 75.0f;
-        }
 
         if(this.overrideDefault)
             this.thisRectTransform.sizeDelta = new Vector2(this.buttonWidth, this.buttonHeight);

@@ -1,3 +1,5 @@
+using NUnit.Framework;
+using System.Collections.Generic;
 using System.Data.Common;
 using System.Xml.Linq;
 using UnityEngine;
@@ -21,7 +23,7 @@ public class DataRetriever : MonoBehaviour
         switch (growthID)
         {
             case 1:
-                return 5.0f;
+                return 0.8f;
                 break;
         }
         Debug.LogError("NO GROWTH RATE WAS RETRIEVED");
@@ -56,10 +58,44 @@ public class DataRetriever : MonoBehaviour
         switch (cropID)
         {
             case 1:
-                return "Sprites/Crops/Apple";
+                return "Sprites/Crops/Apple/Apple";
                 break;
         }
         Debug.LogError("NO CROP ASSET DIRECTORY WAS RETRIEVED");
         return "";
+    }
+
+    public int RetrieveMarketID(int cropID)
+    {
+        switch (cropID)
+        {
+            case 1:
+                return 1;
+                break;
+        }
+        Debug.LogError("NO CROP MARKET ID WAS RETRIEVED");
+        return 0;
+    }
+    public int RetrieveSellingPrice(int marketID)
+    {
+        switch (marketID)
+        {
+            case 1:
+                return 20;
+                break;
+        }
+        Debug.LogError("NO CROP SELLING PRICE WAS RETRIEVED");
+        return 0;
+    }
+    public List<Rarity> RetrieveRarities()
+    {
+        List<Rarity> rarities = new();
+
+        rarities.Add(new Rarity(1, "Common", 0.0f, 0.5f, new Color(255, 255, 255, 255)));
+        rarities.Add(new Rarity(2, "Rare", 25.0f, 0.3f, new Color(51, 153, 255, 255)));
+        rarities.Add(new Rarity(1, "Epic", 50.0f, 0.15f, new Color(153, 251, 255, 255)));
+        rarities.Add(new Rarity(1, "Legendary", 100.0f, 0.05f, new Color(255, 215, 0, 255)));
+
+        return rarities;
     }
 }

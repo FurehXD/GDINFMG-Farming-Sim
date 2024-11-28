@@ -37,7 +37,6 @@ public class Pulser : MonoBehaviour
             this.maxScale = this.transform.localScale * maxScaleMultiplier;
             this.pulseRate *= (maxScaleMultiplier - 1.0f) * 10.0f;
             this.hasInit = true;
-            Debug.Log("WTF");
         }
 
         this._triggerStop = false;
@@ -78,5 +77,6 @@ public class Pulser : MonoBehaviour
     public void StopPulsing()
     {
         this._triggerStop = true;
+        this.transform.localScale = this.defaultScale;
     }
 }

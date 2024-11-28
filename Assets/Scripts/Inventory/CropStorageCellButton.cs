@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using UnityEditor.Events;
 using UnityEngine;
@@ -16,9 +17,23 @@ public class CropStorageCellButton : BaseButton
     private TextMeshProUGUI quantityTMPDisplay;
 
     private BaseButton selectedPlotReference;
+    private CropProducer cropProducerReference;
 
-    private void Start()
+    protected override void OnEnable()
     {
+        base.OnEnable();
+        InventoryManager.OnInventoryOpened += this.EnableButton;
+        InventoryManager.OnInventoryClosed += this.DisableButton;
+    }
+    protected override void OnDisable()
+    {
+        base.OnDisable();
+        InventoryManager.OnInventoryOpened -= this.EnableButton;
+        InventoryManager.OnInventoryClosed -= this.DisableButton;
+    }
+    protected override void Start()
+    {
+        base.Start();
         this.interactable = false;
         this.cropItStores = this.GetComponentInChildren<Crop>();
         this.quantityTMPDisplay = this.GetComponentInChildren<TextMeshProUGUI>();
@@ -33,15 +48,26 @@ public class CropStorageCellButton : BaseButton
         //UnityEventTools.AddPersistentListener(myButton.onClick, ExampleMethod2);
 #endif
     }
+    public void ConsumeSeed()
+    {
+        this.quantity--;
+
+        if (this.quantity < 0) 
+            this.quantity = 0;
+    }
+    public void SignalStartProduction()
+    {
+        this.cropProducerReference = InventoryManager.Instance.CropProducerReference;
+
+        this.cropProducerReference.StartProduction(this.cropItStores);
+    }
     protected override void Update()
     {
         base.Update();
         this.cropItStores.CropID = this.cropIDItStores;
         this.quantityTMPDisplay.text = "x" + this.quantity;
-    }
 
-    public void LogSelectedPlot(BaseButton selectedPlot)
-    {
-        this.selectedPlotReference = selectedPlot;
+        if (this.quantity == 0)
+            this.interactable = false;
     }
 }
