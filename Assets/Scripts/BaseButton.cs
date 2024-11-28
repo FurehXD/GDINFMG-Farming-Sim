@@ -4,20 +4,19 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-
+#if UNITY_EDITOR
+using UnityEditor.Events; // Required for adding persistent calls
+#endif
 [Serializable]
 public class BaseButton : Button, IPointerEnterHandler, IPointerExitHandler
 {
     [Header("Button Behavior Settings")]
     [SerializeField]
     protected EHoverType[] hoverTypes;
-    protected bool buttonIsActive = true;
     [SerializeField]
     protected EButtonType buttonType = EButtonType.NO_CONFIRM;
 
     [Header("Button Visibility Settings")]
-    [SerializeField]
-    private float defaultDimAlpha = 148.0f;
     private float baseAlpha;
 
     [Header("Hover Marker Settings")]
@@ -27,10 +26,7 @@ public class BaseButton : Button, IPointerEnterHandler, IPointerExitHandler
     private Image markerAssetReference;
 
     [Header("Enbiggen Settings")]
-    [SerializeField]
-    private float enbiggenScale = 1.25f;
-    private Vector3 defaultScale;
-    private bool hasEnbiggened = false;
+    private Enbiggener enbiggenerComponent;
 
     [Header("Bubble Descriptor Settings")]
     [SerializeField]
@@ -86,42 +82,15 @@ public class BaseButton : Button, IPointerEnterHandler, IPointerExitHandler
     protected bool buttonIsPressed = false;
 
     protected RectTransform thisRectTransform; 
-    public void ToggleDim(bool willDim)
-    {
-        Image[] iconChildren = this.GetComponentsInChildren<Image>();
-        Image thisImage = this.GetComponent<Image>();
-
-        if (this.defaultDimAlpha == 0)
-        {
-            this.defaultDimAlpha = 150.0f;
-            Debug.LogWarning("DIM ALPHA OF " + this.name + " button was set to 0, setting it to " + this.defaultDimAlpha);
-        }
-
-        // Normalize alpha (defaultDimAlpha / 255) to keep the value between 0 and 1
-        float normalizedDimAlpha = this.defaultDimAlpha / 255.0f;
-
-        if (thisImage != null)
-        {
-            if (willDim)
-            {
-                thisImage.color = new Color(thisImage.color.r, thisImage.color.g, thisImage.color.b, normalizedDimAlpha);
-            }
-            else
-            {
-                thisImage.color = new Color(thisImage.color.r, thisImage.color.g, thisImage.color.b, this.baseAlpha);
-            }
-        }
-    }
     public void EnableSemSagaButton(bool enabled)
     {
         if (!enabled && Array.Exists(this.hoverTypes, hoverType => hoverType == EHoverType.BUBBLE_DESCRIPTOR))
             this.DeleteBubbleDescriptor();
-        this.buttonIsActive = enabled;
-        this.ToggleDim(!enabled);
+        this.interactable = enabled;
     }
     public override void OnPointerEnter(PointerEventData eventData)
     {
-        if (!this.buttonIsPressed && this.buttonIsActive)
+        if (!this.buttonIsPressed && this.interactable)
         {
             if (this.hoverSFX != null) hoverSFX.Play();
 
@@ -135,7 +104,7 @@ public class BaseButton : Button, IPointerEnterHandler, IPointerExitHandler
             switch (hoverType)
             {
                 case EHoverType.ENBIGGEN:
-                    this.Enbiggen();
+                    this.enbiggenerComponent.Enbiggen();
                     break;
                 case EHoverType.BUBBLE_DESCRIPTOR:
                     this.CreateBubbleDescriptor();
@@ -214,7 +183,7 @@ public class BaseButton : Button, IPointerEnterHandler, IPointerExitHandler
             switch (hoverType)
             {
                 case EHoverType.ENBIGGEN:
-                    this.ResetSize();
+                    this.enbiggenerComponent.ResetSize();
                     break;
                 case EHoverType.BUBBLE_DESCRIPTOR:
                     this.DeleteBubbleDescriptor();
@@ -246,16 +215,6 @@ public class BaseButton : Button, IPointerEnterHandler, IPointerExitHandler
                 thisImage.color = uniqueAlphaColor;
             }
         }
-    }
-    protected virtual void Enbiggen()
-    {
-        this.thisRectTransform.localScale *= this.enbiggenScale;
-        this.hasEnbiggened = true;
-    }
-    protected virtual void ResetSize()
-    {
-        this.thisRectTransform.localScale = this.defaultScale;
-        this.hasEnbiggened = false;
     }
     private void CreateMarker()
     {
@@ -289,15 +248,14 @@ public class BaseButton : Button, IPointerEnterHandler, IPointerExitHandler
     }
     public override void OnPointerExit(PointerEventData eventData)
     {
-        if (!this.buttonIsPressed && this.buttonIsActive)
+        if (!this.buttonIsPressed && this.interactable)
             this.PerformPointerExit();
     }
     protected virtual void OnClicked()
     {
-        if (this.buttonIsActive)
+        if (this.interactable)
         {
-            if (this.hasEnbiggened)
-                this.ResetSize();
+            this.enbiggenerComponent.ResetSize();
 
             switch (this.buttonType)
             {
@@ -320,7 +278,7 @@ public class BaseButton : Button, IPointerEnterHandler, IPointerExitHandler
 
         if (this.newSpriteDefault)
             this.targetGraphic.GetComponent<Image>().sprite = this.newSpriteDefault;
-        this.ResetSize();
+        this.enbiggenerComponent.ResetSize();
     }
     protected virtual void InitializeBubbleDescriptor()
     {
@@ -332,6 +290,7 @@ public class BaseButton : Button, IPointerEnterHandler, IPointerExitHandler
     {
         this.bubbleBorder = Resources.Load<GameObject>("Prefabs/UI/Bubble Template").GetComponent<Image>();
         this.thisRectTransform = this.GetComponent<RectTransform>();
+        this.enbiggenerComponent = this.GetComponent<Enbiggener>();
 
         this.InitializeBubbleDescriptor();
 
@@ -351,7 +310,6 @@ public class BaseButton : Button, IPointerEnterHandler, IPointerExitHandler
         if(this.overrideDefault)
             this.thisRectTransform.sizeDelta = new Vector2(this.buttonWidth, this.buttonHeight);
 
-        this.defaultScale = this.thisRectTransform.localScale;
         this.baseAlpha = this.targetGraphic.GetComponent<Image>().color.a;
     }
     public void SetButtonNumber(int buttonNumber)
@@ -366,6 +324,6 @@ public class BaseButton : Button, IPointerEnterHandler, IPointerExitHandler
 
     protected virtual void Update()
     {
-        this.GetComponent<Button>().interactable = this.buttonIsActive;
+        this.GetComponent<Button>().interactable = this.interactable;
     }
 }
