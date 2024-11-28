@@ -54,7 +54,6 @@ public class RaritySetter : MonoBehaviour
             this.iconApplier.ApplyIcon(rarityIndicator);
             this.imageComponentReference.enabled = true;
             this.imageComponentReference.color = rarity.RarityColor / 255.0f;
-            Debug.Log(this.imageComponentReference.color);
         }
         else
             Debug.LogError("RARITY INDICATOR WAS NOT APPLIED");

@@ -93,8 +93,8 @@ public class DataRetriever : MonoBehaviour
 
         rarities.Add(new Rarity(1, "Common", 0.0f, 0.5f, new Color(255, 255, 255, 255)));
         rarities.Add(new Rarity(2, "Rare", 25.0f, 0.3f, new Color(51, 153, 255, 255)));
-        rarities.Add(new Rarity(1, "Epic", 50.0f, 0.15f, new Color(153, 251, 255, 255)));
-        rarities.Add(new Rarity(1, "Legendary", 100.0f, 0.05f, new Color(255, 215, 0, 255)));
+        rarities.Add(new Rarity(3, "Epic", 50.0f, 0.15f, new Color(153, 51, 255, 255)));
+        rarities.Add(new Rarity(4, "Legendary", 100.0f, 0.05f, new Color(255, 215, 0, 255)));
 
         return rarities;
     }
