@@ -37,6 +37,7 @@ public class PlotButton : BaseButton
 #if UNITY_EDITOR
         if (readyForHarvest)
         {
+            this.EnableButton();
             // Remove any existing persistent calls to avoid duplication
             UnityEditor.Events.UnityEventTools.RemovePersistentListener(this.onClick, this.Harvest);
             UnityEditor.Events.UnityEventTools.RemovePersistentListener(this.onClick, this.OpenInventory);
@@ -64,10 +65,7 @@ public class PlotButton : BaseButton
         base.PerformClick();
 
         if (!readyForHarvest)
-        {
-            Debug.Log("haiyaa");
             OnPlotSelected?.Invoke(this);
-        }
     }
     public void Harvest()
     {

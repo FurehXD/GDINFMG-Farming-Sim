@@ -7,11 +7,13 @@ public class CloseInventoryButton : BaseButton
     {
         base.OnEnable();
         InventoryManager.OnInventoryOpened += EnableImage;
+        InventoryManager.OnInventoryClosed += DisableImage;
     }
     protected override void OnDisable()
     {
         base.OnDisable();
         InventoryManager.OnInventoryOpened -= EnableImage;
+        InventoryManager.OnInventoryClosed -= DisableImage;
     }
     private void EnableImage()
     {

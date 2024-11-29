@@ -98,4 +98,16 @@ public class DataRetriever : MonoBehaviour
 
         return rarities;
     }
+    public List<QualityData> RetrieveQualities()
+    {
+        List<QualityData> qualities = new();
+
+        qualities.Add(new QualityData(1, "Poor", 0.4f));
+        qualities.Add(new QualityData(2, "Normal", 0.8f));
+        qualities.Add(new QualityData(3, "Good", 1f));
+        qualities.Add(new QualityData(4, "Excellent", 1.2f));
+        qualities.Add(new QualityData(5, "Perfect", 1.5f));
+
+        return qualities;
+    }
 }

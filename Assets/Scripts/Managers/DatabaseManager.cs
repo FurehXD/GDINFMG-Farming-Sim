@@ -42,7 +42,7 @@ public class DatabaseManager : MonoBehaviour
 
     private void InitializeDatabase()
     {
-        connectionString = @"Server=DESKTOP-MLM2Q7R\SQLEXPRESS;Database=FarmGame;Integrated Security=True;TrustServerCertificate=True;Encrypt=False;";
+        connectionString = @"Server=MARCOS-PC\SQLEXPRESS;Database=FarmGame;Integrated Security=True;TrustServerCertificate=True;Encrypt=False;";
         TestConnection();
     }
 
@@ -186,11 +186,11 @@ public class DatabaseManager : MonoBehaviour
                     while (await reader.ReadAsync())
                     {
                         QualityData quality = new QualityData
-                        {
-                            QualityID = Convert.ToInt32(reader["QualityID"]),
-                            QualityName = reader["QualityName"].ToString(),
-                            GrowthRateBuffPercentage = Convert.ToSingle(reader["GrowthRateBuffPercentage"])
-                        };
+                        (
+                            Convert.ToInt32(reader["QualityID"]),
+                            reader["QualityName"].ToString(),
+                            Convert.ToSingle(reader["GrowthRateBuffPercentage"])
+                        );
                         qualities.Add(quality);
                     }
                 }

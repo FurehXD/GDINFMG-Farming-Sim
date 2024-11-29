@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class DataGrabber : MonoBehaviour
 {
-    void Start()
+    private void Start()
     {
         DatabaseManager.Instance.FetchAllDataExample();
     }

@@ -1,4 +1,5 @@
 using System.Collections;
+using System;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -14,12 +15,26 @@ public class CropProducer : MonoBehaviour
     private Crop cropComponentReference;
 
     private RaritySetter raritySetter;
+    private CropIconEnabler cropIconEnabler;
+    private EmptyTextEnabler emptyTextEnabler;
+    private PlotButton plotButton;
 
     public UnityEvent OnReadyForHarvest;
+    public static event Action OnProductionStarted;
     public void StartProduction(Crop crop)
     {
         this.pulserReference = this.GetComponentInChildren<Pulser>();
         this.raritySetter = this.GetComponentInChildren<RaritySetter>();
+        this.cropIconEnabler = this.GetComponentInChildren<CropIconEnabler>();
+        this.emptyTextEnabler = this.GetComponentInChildren<EmptyTextEnabler>();
+        
+        this.plotButton = this.GetComponent<PlotButton>();
+        this.plotButton.DisableButton();
+
+        this.cropIconEnabler.EnableCropIcon(true);
+        this.emptyTextEnabler.DontSetToEmpty();
+
+        OnProductionStarted?.Invoke();
 
         this.cropComponentReference = this.GetComponentInChildren<Crop>();
         this.cropComponentReference.CropID = crop.CropID;

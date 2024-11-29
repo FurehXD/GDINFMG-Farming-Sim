@@ -8,9 +8,9 @@ public class Harvester : MonoBehaviour
     {
         Crop cropReference = this.GetComponentInChildren<Crop>();
 
-        cropReference.GetComponent<Image>().enabled = false;
+        this.GetComponentInChildren<CropIconEnabler>().EnableCropIcon(false);
         this.GetComponentInChildren<RaritySetter>().GetComponent<Image>().enabled = false;
-        this.GetComponentInChildren<TextMeshProUGUI>().enabled = false;
+        this.GetComponentInChildren<EmptyTextEnabler>().SetToEmpty();
 
         Money.Instance.Sell(cropReference.SellingPrice);
     }

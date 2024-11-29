@@ -27,10 +27,12 @@ public class InventoryManager : MonoBehaviour
     private void OnEnable()
     {
         PlotButton.OnPlotSelected += this.LogSelectedPlot;
+        CropProducer.OnProductionStarted += this.CloseInventory;
     }
     private void OnDisable()
     {
         PlotButton.OnPlotSelected -= this.LogSelectedPlot;
+        CropProducer.OnProductionStarted -= this.CloseInventory;
     }
     public void OpenInventory()
     {
