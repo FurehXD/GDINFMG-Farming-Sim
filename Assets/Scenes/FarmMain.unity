@@ -1308,6 +1308,7 @@ GameObject:
   - component: {fileID: 971121293}
   - component: {fileID: 971121295}
   - component: {fileID: 971121294}
+  - component: {fileID: 971121296}
   m_Layer: 5
   m_Name: Empty Crop Indicator
   m_TagString: Untagged
@@ -1433,6 +1434,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 971121292}
   m_CullTransparentMesh: 1
+--- !u!114 &971121296
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 971121292}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9152244f8860c3a4190a0d016d3a6696, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1057146482
 GameObject:
   m_ObjectHideFlags: 0
