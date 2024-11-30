@@ -8,6 +8,7 @@ public class DatabaseManager : MonoBehaviour
 {
     private static DatabaseManager instance;
     private string connectionString;
+    public string ConnectionString => connectionString;
 
     [SerializeField] private string serverAddress = "34.124.240.46";
     [SerializeField] private string databaseName = "FarmGame";
@@ -224,10 +225,10 @@ public class DatabaseManager : MonoBehaviour
         return qualities;
     }
 
-    public async Task<List<RarityData>> GetRarities()
+    public async Task<List<Rarity>> GetRarities()
     {
-        List<RarityData> rarities = new List<RarityData>();
-        
+        List<Rarity> rarities = new List<Rarity>();
+
         try
         {
             using (SqlConnection connection = new SqlConnection(connectionString))
@@ -240,16 +241,20 @@ public class DatabaseManager : MonoBehaviour
                 {
                     while (await reader.ReadAsync())
                     {
-                        RarityData rarity = new RarityData
-                        {
-                            RarityID = Convert.ToInt32(reader["RarityID"]),
-                            RarityType = reader["RarityType"].ToString(),
-                            PriceBuffPercentage = Convert.ToSingle(reader["PriceBuffPercentage"]),
-                            Probability = Convert.ToSingle(reader["Probability"]),
-                            RarityColorRed = Convert.ToInt32(reader["RarityColorRed"]),
-                            RarityColorGreen = Convert.ToInt32(reader["RarityColorGreen"]),
-                            RarityColorBlue = Convert.ToInt32(reader["RarityColorBlue"])
-                        };
+                        Color rarityColor = new Color(
+                            Convert.ToInt32(reader["RarityColorRed"]) / 255f,
+                            Convert.ToInt32(reader["RarityColorGreen"]) / 255f,
+                            Convert.ToInt32(reader["RarityColorBlue"]) / 255f,
+                            1f
+                        );
+
+                        Rarity rarity = new Rarity(
+                            Convert.ToInt32(reader["RarityID"]),
+                            reader["RarityType"].ToString(),
+                            Convert.ToSingle(reader["PriceBuffPercentage"]),
+                            Convert.ToSingle(reader["Probability"]),
+                            rarityColor
+                        );
                         rarities.Add(rarity);
                     }
                 }
@@ -337,7 +342,7 @@ public class DatabaseManager : MonoBehaviour
         }
 
         Debug.Log("=== FETCHING RARITIES ===");
-        List<RarityData> rarities = await GetRarities();
+        List<Rarity> rarities = await GetRarities();
         if (rarities != null)
         {
             foreach (var rarity in rarities)
@@ -347,8 +352,8 @@ public class DatabaseManager : MonoBehaviour
                     $"- ID: {rarity.RarityID}\n" +
                     $"- Type: {rarity.RarityType}\n" +
                     $"- Price Buff: {rarity.PriceBuffPercentage}%\n" +
-                    $"- Probability: {rarity.Probability}%\n" +
-                    $"- Color (RGB): ({rarity.RarityColorRed}, {rarity.RarityColorGreen}, {rarity.RarityColorBlue})\n" +
+                    $"- Probability: {rarity.RarityProbability}%\n" +
+                    $"- Color: {rarity.RarityColor}\n" +
                     "----------------------------------------"
                 );
             }

@@ -1,32 +1,82 @@
 using NUnit.Framework;
+using System;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Threading.Tasks;
+
 
 public class RaritySetter : MonoBehaviour
 {
-    private List<Rarity> rarities = new(); //MySQL
+    private List<Rarity> rarities;
 
     private Crop cropComponentReference;
     private IconApplier iconApplier;
     private Image imageComponentReference;
 
-    private void Start()
+    private bool isLoading = false;
+
+    private async void Start()
     {
         this.imageComponentReference = this.GetComponent<Image>();
         this.iconApplier = this.GetComponent<IconApplier>();
         this.imageComponentReference.enabled = false;
+        await LoadRarities();
     }
-    private void Update()
+
+
+    private async void Update()
     {
-        this.rarities = DataRetriever.Instance.RetrieveRarities();
+        if (rarities == null && !isLoading)
+        {
+            isLoading = true;
+            try
+            {
+                rarities = await DataRetriever.Instance.RetrieveRarities();
+                if (rarities != null)
+                {
+                    Debug.Log($"[RARITY SETTER]: Loaded {rarities.Count} rarities");
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Failed to retrieve rarities: {e.Message}");
+            }
+            finally
+            {
+                isLoading = false;
+            }
+        }
+    }
+
+    private async Task LoadRarities()
+    {
+        if (!isLoading)
+        {
+            isLoading = true;
+            try 
+            {
+                rarities = await DataRetriever.Instance.RetrieveRarities();
+                if (rarities == null || rarities.Count == 0)
+                {
+                    Debug.LogError("Failed to load rarities from database");
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Error loading rarities: {e.Message}");
+            }
+            finally
+            {
+                isLoading = false;
+            }
+        }
     }
     public int DetermineRarity(Crop cropComponentReference)
     {
-        float randomNumber = Random.Range(0.01f, 1);
-
+        float randomNumber = UnityEngine.Random.Range(0.01f, 1);
         this.cropComponentReference = cropComponentReference;
-
         foreach (Rarity rarity in rarities)
         {
             if (randomNumber >= rarity.RarityProbability)
