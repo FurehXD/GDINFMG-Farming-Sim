@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 7806509708515028804}
   - component: {fileID: 6326193894310166888}
   m_Layer: 5
-  m_Name: CropButton
+  m_Name: FertilizerButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -124,7 +124,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   hoverTypes: 00000000
-  buttonType: 1
+  buttonType: 0
   markerAsset: {fileID: 0}
   bubbleText: CropButton
   bubbleRelativeScaleFactor: 0.5
