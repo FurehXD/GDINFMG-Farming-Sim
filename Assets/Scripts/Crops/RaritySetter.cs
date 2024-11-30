@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,33 +12,52 @@ public class RaritySetter : MonoBehaviour
     private IconApplier iconApplier;
     private Image imageComponentReference;
 
+    private bool isLoading = false;
+
     private void Start()
     {
         this.imageComponentReference = this.GetComponent<Image>();
         this.iconApplier = this.GetComponent<IconApplier>();
         this.imageComponentReference.enabled = false;
     }
-    private void Update()
+    private async void Update()
     {
-        this.rarities = DataRetriever.Instance.RetrieveRarities();
+        if (rarities == null && !isLoading)
+        {
+            isLoading = true;
+            try
+            {
+                rarities = await DataRetriever.Instance.RetrieveRarities();
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Failed to retrieve rarities: {e.Message}");
+            }
+            finally
+            {
+                isLoading = false;
+            }
+        }
     }
     public int DetermineRarity(Crop cropComponentReference)
     {
-        float randomNumber = Random.Range(0.01f, 1);
-
+        float randomNumber = UnityEngine.Random.Range(0.01f, 1);
         this.cropComponentReference = cropComponentReference;
+        float cumulativeProbability = 0;
 
         foreach (Rarity rarity in rarities)
         {
-            if (randomNumber >= rarity.RarityProbability)
+            cumulativeProbability += rarity.RarityProbability;
+            if (randomNumber <= cumulativeProbability)
             {
                 this.DisplayRarity(rarity.RarityID);
-                Debug.Log(rarity.RarityType + ", Random Number = " + randomNumber + " vs. " + rarity.RarityProbability);
+                Debug.Log($"{rarity.RarityType}, Random Number = {randomNumber} vs. Cumulative Probability {cumulativeProbability}");
                 return rarity.RarityID;
             }
         }
+
         Debug.Log("ERROR NO RARITY ID WAS RETURNED");
-        return 0;
+        return 1; // Return Common rarity as fallback
     }
     public void DisplayRarity(int rarityID)
     {

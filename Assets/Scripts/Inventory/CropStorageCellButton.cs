@@ -71,19 +71,24 @@ public class CropStorageCellButton : BaseButton
         }
 #endif
     }
-    public void OpenSubStorageCells()
+    public async void OpenSubStorageCells()
     {
-        List<QualityData> availableQualities = DataRetriever.Instance.RetrieveQualities();
-
-        foreach(QualityData qualityData in availableQualities)
+        List<QualityData> availableQualities = await DataRetriever.Instance.RetrieveQualities();
+        if (availableQualities != null)  // Add null check for safety
         {
-            SubCropStorageCellButton subCropStorageCellButton = Instantiate(this.subCellPrefabTemplate, this.childLayoutGroup.transform);
-            subCropStorageCellButton.Initialize(qualityData, this.cropItStores);
-
-            this.childButtonReferences.Add(subCropStorageCellButton);
+            foreach (QualityData qualityData in availableQualities)
+            {
+                SubCropStorageCellButton subCropStorageCellButton = Instantiate(this.subCellPrefabTemplate, this.childLayoutGroup.transform);
+                subCropStorageCellButton.Initialize(qualityData, this.cropItStores);
+                this.childButtonReferences.Add(subCropStorageCellButton);
+            }
+            OnCropStorageCellButtonClicked?.Invoke(this);
+            this.subStorageIsOpen = true;
         }
-        OnCropStorageCellButtonClicked?.Invoke(this);
-        this.subStorageIsOpen = true;
+        else
+        {
+            Debug.LogError("Failed to retrieve qualities from database");
+        }
     }
     public void CloseSubStorageCells()
     {
