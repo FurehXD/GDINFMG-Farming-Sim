@@ -1,8 +1,17 @@
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ShopManager : MonoBehaviour {
     [Header("Singleton Manager")]
     public static ShopManager Instance;
+    [SerializeField]
+    private Money _money;
+    [SerializeField]    public List<Button> _cropButtons;
+    [SerializeField]    public List<Button> _fertilizerButtons;
+    [SerializeField]    public List<Button> _upgradeButtons;
+    [SerializeField]    public Button _confirmButton;
+    [SerializeField]    public Button _returnButton;
     
     void OnAwake() {
         if (Instance == null) {
@@ -25,10 +34,15 @@ public class ShopManager : MonoBehaviour {
         
     }
 
+    void InitializeShopItems() {
+        //
+    }
+
     public bool CheckPurchase(int cost) {
-        //if(money >= cost) {}
-        //return true;
-        //else{}
+        if(_money.CurrentMoney >= cost) {
+            _money.Buy(cost);
+        }
+        else{}
         return false;
     }
 }
