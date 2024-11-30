@@ -1,9 +1,9 @@
 using UnityEngine;
-using System;
 
-public class AdminManager : MonoBehaviour {
+public class ShopManager : MonoBehaviour {
     [Header("Singleton Manager")]
-    public static AdminManager Instance;
+    public static ShopManager Instance;
+    
     void OnAwake() {
         if (Instance == null) {
             Instance = this;
@@ -12,7 +12,7 @@ public class AdminManager : MonoBehaviour {
             Destroy(this.gameObject);
         }
     }
-    
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -25,5 +25,10 @@ public class AdminManager : MonoBehaviour {
         
     }
 
-    
+    public bool CheckPurchase(int cost) {
+        //if(money >= cost) {}
+        //return true;
+        //else{}
+        return false;
+    }
 }
