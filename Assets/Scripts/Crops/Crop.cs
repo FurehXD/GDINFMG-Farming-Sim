@@ -11,33 +11,46 @@ public class Crop : MonoBehaviour
     protected Sprite cropIcon;
     public Sprite CropIcon { get { return cropIcon; } }
 
-    protected string cropAssetDirectory;//MYSQL
-    public string CropAssetDirectory {  get { return cropAssetDirectory; } }    
-    protected string cropName;//MYSQL
+    protected string cropAssetDirectory;
+    public string CropAssetDirectory { get { return cropAssetDirectory; } }
 
+    protected string cropName;
     protected int rarityID;
     public int RarityID { set { this.rarityID = value; } }
 
-    protected float growthRate;//MYSQL
+    protected float growthRate;
     public float GrowthRate { get { return this.growthRate; } }
-    protected int growthID; //MYSQL
 
-    private int marketID;//MYSQL
-    private int sellingPrice;//MYSQL
-    public int SellingPrice { get { return this.sellingPrice; } }
+    protected int growthID;
+    private int marketID;
+    private decimal sellingPrice;
+    public decimal SellingPrice { get { return this.sellingPrice; } }
 
-    protected virtual void Update()
+    private bool isLoading = false;
+
+    protected virtual async void Update()
     {
-        this.cropName = DataRetriever.Instance.RetrieveCropName(this.cropID);
-        this.cropAssetDirectory = DataRetriever.Instance.RetrieveCropAssetDirectory(this.cropID);
-
-        this.cropIcon = Resources.Load<Sprite>(this.cropAssetDirectory);
-
-        this.growthID = DataRetriever.Instance.RetrieveGrowthID(this.cropID);
-        this.growthRate = DataRetriever.Instance.RetrieveCropGrowthRate(this.growthID);
-
-        this.marketID = DataRetriever.Instance.RetrieveMarketID(this.cropID);
-        this.sellingPrice = DataRetriever.Instance.RetrieveSellingPrice(this.marketID);
+        if (!isLoading)
+        {
+            isLoading = true;
+            try
+            {
+                cropName = await DataRetriever.Instance.RetrieveCropName(cropID);
+                cropAssetDirectory = DataRetriever.Instance.RetrieveCropAssetDirectory(cropID);
+                cropIcon = Resources.Load<Sprite>(cropAssetDirectory);
+                growthID = await DataRetriever.Instance.RetrieveGrowthID(cropID);
+                growthRate = await DataRetriever.Instance.RetrieveCropGrowthRate(growthID);
+                marketID = await DataRetriever.Instance.RetrieveMarketID(cropID);
+                sellingPrice = await DataRetriever.Instance.RetrieveSellingPrice(marketID);
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"Error updating crop data: {e.Message}");
+            }
+            finally
+            {
+                isLoading = false;
+            }
+        }
     }
-
 }

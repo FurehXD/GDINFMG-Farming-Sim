@@ -12,6 +12,6 @@ public class Harvester : MonoBehaviour
         this.GetComponentInChildren<RaritySetter>().GetComponent<Image>().enabled = false;
         this.GetComponentInChildren<EmptyTextEnabler>().SetToEmpty();
 
-        Money.Instance.Sell(cropReference.SellingPrice);
+        Money.Instance.Sell((int)cropReference.SellingPrice); 
     }
 }
