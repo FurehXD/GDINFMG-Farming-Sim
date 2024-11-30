@@ -34,6 +34,7 @@ public class CropStorageCellButton : BaseButton
 
         OnCropStorageCellButtonClicked += this.CloseSubStorageCells;
         CropProducer.OnProductionStarted += this.CloseSubStorageCells;
+        InventoryManager.OnInventoryClosed += this.CloseSubStorageCells;
     }
     protected override void OnDisable()
     {
@@ -43,6 +44,7 @@ public class CropStorageCellButton : BaseButton
 
         OnCropStorageCellButtonClicked -= this.CloseSubStorageCells;
         CropProducer.OnProductionStarted -= this.CloseSubStorageCells;
+        InventoryManager.OnInventoryClosed -= this.CloseSubStorageCells;
     }
     protected override void Start()
     {
@@ -79,7 +81,7 @@ public class CropStorageCellButton : BaseButton
             foreach (QualityData qualityData in availableQualities)
             {
                 SubCropStorageCellButton subCropStorageCellButton = Instantiate(this.subCellPrefabTemplate, this.childLayoutGroup.transform);
-                subCropStorageCellButton.Initialize(qualityData, this.cropItStores);
+                subCropStorageCellButton.Initialize(qualityData, this.cropItStores, this);
                 this.childButtonReferences.Add(subCropStorageCellButton);
             }
             OnCropStorageCellButtonClicked?.Invoke(this);

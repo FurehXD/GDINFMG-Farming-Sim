@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public class SubCropStorageCellButton : BaseButton
 {
+    private CropStorageCellButton parentCreator;
+
     private bool hasBeenInitialized = false;
     private QualityData quality;
 
@@ -15,16 +17,23 @@ public class SubCropStorageCellButton : BaseButton
     private int quantity = 1;
     private TextMeshProUGUI quantityTMPDisplay;
 
-    public void Initialize(QualityData quality, Crop storingCrop)
+    public void Initialize(QualityData quality, Crop storingCrop, CropStorageCellButton parentCreator)
     {
         this.quality = quality; 
         this.cropItStores = storingCrop;
+        this.parentCreator = parentCreator;
 
         this.GetComponentInChildren<IconApplier>().ApplyIcon(this.cropItStores.CropIcon);
         QualitySetter qualityIndicatorComponent = this.GetComponentInChildren<QualitySetter>();
         qualityIndicatorComponent.SetQuality(this.quality.QualityID);
 
         this.hasBeenInitialized = true; 
+    }
+    protected override void PerformClick()
+    {
+        base.PerformClick();
+
+        this.parentCreator.SendConfirmation();
     }
     protected override void Start()
     {

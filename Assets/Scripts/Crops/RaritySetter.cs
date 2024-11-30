@@ -89,7 +89,7 @@ public class RaritySetter : MonoBehaviour
         Debug.Log("ERROR NO RARITY ID WAS RETURNED");
         return 0;
     }
-    public void DisplayRarity(int rarityID)
+    private void DisplayRarity(int rarityID)
     {
         Rarity rarity = this.rarities.Find(rarity => rarity.RarityID == rarityID);
 

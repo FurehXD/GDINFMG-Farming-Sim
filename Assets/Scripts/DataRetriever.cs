@@ -200,4 +200,16 @@ public class DataRetriever : MonoBehaviour
         Debug.LogError("NO CROP ASSET DIRECTORY WAS RETRIEVED");
         return "";
     }
+
+    //@TODO
+    public List<PlotArea> RetrievePlotAreas()
+    {
+        List<PlotArea > plotAreas = new List<PlotArea>();
+
+        plotAreas.Add(new PlotArea(1, "Outdoor", 1.1f, new Vector2(8,5), "Sprites/Plot Area/Outdoor"));
+        plotAreas.Add(new PlotArea(2, "Greenhouse", 0.9f, new Vector2(5,5), "Sprites/Plot Area/Greenhouse"));
+        plotAreas.Add(new PlotArea(3, "Lakeside", 1.0f, new Vector2(6,5), "Sprites/Plot Area/Lakeside"));
+
+        return plotAreas;
+    }
 }

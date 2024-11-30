@@ -257,6 +257,10 @@ public class BaseButton : Button, IPointerEnterHandler, IPointerExitHandler
         if (!this.buttonIsPressed && this.interactable)
             this.PerformPointerExit();
     }
+    public void SendConfirmation()
+    {
+        this.buttonIsPressed = false;
+    }
     protected virtual void PerformClick()
     {
         if(this.enbiggenerComponent && Array.Exists(this.hoverTypes, hoverType => hoverType == EHoverType.ENBIGGEN))
