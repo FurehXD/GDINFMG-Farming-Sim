@@ -7,7 +7,9 @@ public class Money : MonoBehaviour
 
     private TextMeshProUGUI moneyDisplay;
     private int currentMoney = 0;
-
+    public int CurrentMoney {
+        get {return this.currentMoney; }  
+    }
     private void Awake()
     {
         if (Instance == null)
