@@ -9,6 +9,11 @@ public class DatabaseManager : MonoBehaviour
     private static DatabaseManager instance;
     private string connectionString;
 
+    [SerializeField] private string serverAddress = "34.124.240.46";
+    [SerializeField] private string databaseName = "FarmGame";
+    [SerializeField] private string username = "sqlserver";
+    [SerializeField] private string password = "m^=^LX)9l\\RQ\"}&0";
+
     public static DatabaseManager Instance
     {
         get
@@ -40,49 +45,64 @@ public class DatabaseManager : MonoBehaviour
         }
     }
 
-    private void InitializeDatabase()
+    private async void InitializeDatabase()
     {
-        connectionString = @"Server=MARCOS-PC\SQLEXPRESS;Database=FarmGame;Integrated Security=True;TrustServerCertificate=True;Encrypt=False;";
-        TestConnection();
+        connectionString = $"Server={serverAddress},1433;" +
+                         $"Database={databaseName};" +
+                         $"User ID={username};" +
+                         $"Password={password};" +
+                         "Encrypt=True;" +
+                         "TrustServerCertificate=True;" +
+                         "Connection Timeout=10;";
+
+        await TestConnection();
     }
 
-    private void TestConnection()
+    public void UpdateConnectionDetails(string server, string database, string user, string pass)
+    {
+        serverAddress = server;
+        databaseName = database;
+        username = user;
+        password = pass;
+        InitializeDatabase();
+    }
+
+    private async Task TestConnection()
     {
         try
         {
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                Debug.Log("Attempting to open database connection...");
-                connection.Open();
+                Debug.Log($"Attempting to connect to: {serverAddress}");
+                await connection.OpenAsync();
                 Debug.Log("Database connection successful!");
 
                 // Test if we can actually query the database
-                using (SqlCommand command = new SqlCommand("SELECT COUNT(*) FROM Crops", connection))
+                using (SqlCommand command = new SqlCommand("SELECT 1", connection))
                 {
-                    int count = (int)command.ExecuteScalar();
-                    Debug.Log($"Connection test successful. Found {count} crops in database.");
+                    await command.ExecuteScalarAsync();
+                    Debug.Log("Query test successful");
                 }
-
-                connection.Close();
             }
         }
         catch (SqlException e)
         {
             Debug.LogError($"SQL Error Number: {e.Number}");
             Debug.LogError($"Database connection failed: {e.Message}");
-            Debug.LogError($"Stack trace: {e.StackTrace}");
 
-            // Common SQL Server error codes
             switch (e.Number)
             {
-                case 4060: // Invalid database
-                    Debug.LogError("Cannot open database. Please verify the database name.");
+                case -2:
+                    Debug.LogError("Timeout expired. Server may be down or unreachable.");
                     break;
-                case 18456: // Login failed
-                    Debug.LogError("Login failed. Please check authentication settings.");
+                case 4060:
+                    Debug.LogError("Invalid database. Check database name.");
                     break;
-                case 10061: // Server not accessible
-                    Debug.LogError("Cannot connect to server. Please verify the server is running and the name is correct.");
+                case 18456:
+                    Debug.LogError("Login failed. Check credentials.");
+                    break;
+                case 40615:
+                    Debug.LogError("Connection encryption error. Check SSL settings.");
                     break;
                 default:
                     Debug.LogError($"Unexpected SQL error: {e.Message}");
@@ -92,7 +112,6 @@ public class DatabaseManager : MonoBehaviour
         catch (Exception e)
         {
             Debug.LogError($"General connection error: {e.Message}");
-            Debug.LogError($"Stack trace: {e.StackTrace}");
         }
     }
 
