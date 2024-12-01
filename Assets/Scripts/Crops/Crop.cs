@@ -15,6 +15,7 @@ public class Crop : MonoBehaviour
     public string CropAssetDirectory { get { return cropAssetDirectory; } }
 
     protected string cropName;
+    public string CropName { get { return cropName; } }
     protected int rarityID;
     public int RarityID { set { this.rarityID = value; } }
 

@@ -48,9 +48,7 @@ public class CropProducer : MonoBehaviour
     }
     private IEnumerator Produce()
     {
-        float growthTime = this.baseGrowthRate;
-
-        growthTime = this.baseGrowthRate/this.growthRate;
+        float growthTime = this.CalculateGrowthTime();
 
         this.pulserReference.StartPulsing();
 
@@ -65,5 +63,19 @@ public class CropProducer : MonoBehaviour
         this.cropComponentReference.RarityID = this.raritySetter.DetermineRarity(this.cropComponentReference);
 
         OnReadyForHarvest.Invoke();
+    }
+
+    private float CalculateGrowthTime()
+    {
+        float growthTime = this.baseGrowthRate;
+        Debug.Log("in here: " + PlotAreaSingleton.Instance.CurrentPlotArea.PlotName);
+        float plotAreaGrowthFactor = PlotAreaSingleton.Instance.CurrentPlotArea.GrowthBuffPercentage - 1;
+
+        growthTime = this.baseGrowthRate / this.growthRate;
+        float timeLost = growthTime * plotAreaGrowthFactor;
+        growthTime -= timeLost;
+
+        Debug.Log("GROWTH TIME Of " + this.cropComponentReference.CropName + " IS " + growthTime + "s");
+        return growthTime;
     }
 }

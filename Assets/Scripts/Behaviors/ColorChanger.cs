@@ -10,10 +10,12 @@ public class ColorChanger : MonoBehaviour
     private void OnEnable()
     {
         InventoryManager.OnInventoryClosed += this.ResetColor;
+        PlotButton.OnPlotSelected += this.ResetColor;
     }
     private void OnDisable()
     {
         InventoryManager.OnInventoryClosed -= this.ResetColor;
+        PlotButton.OnPlotSelected -= this.ResetColor;
     }
     private void Start()
     {
@@ -26,5 +28,10 @@ public class ColorChanger : MonoBehaviour
     public void ResetColor()
     {
         this.GetComponent<Image>().color = defaultColor;
+    }
+    public void ResetColor(PlotButton plotButton)
+    {
+        //if (plotButton.transform.parent != this.transform.parent)
+            this.ResetColor();
     }
 }
