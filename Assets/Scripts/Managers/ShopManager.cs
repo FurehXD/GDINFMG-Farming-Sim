@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,6 +13,7 @@ public class ShopManager : MonoBehaviour {
     [SerializeField]    public List<Button> _upgradeButtons;
     [SerializeField]    public Button _confirmButton;
     [SerializeField]    public Button _returnButton;
+    [SerializeField]    public TMP_Text _purchaseMessage;
     
     void OnAwake() {
         if (Instance == null) {
@@ -44,5 +46,18 @@ public class ShopManager : MonoBehaviour {
         }
         else{}
         return false;
+    }
+
+    public void BuyItem(string itemID) {
+        //get item form database using id
+        //add crop to inventory
+        //if(this.CheckPurchase(cost)) {
+            //add to inventory
+            //change text to say purchase bought
+        //}
+        //else {
+            //change text to say fail
+        //}
+        Debug.Log("Success");
     }
 }
