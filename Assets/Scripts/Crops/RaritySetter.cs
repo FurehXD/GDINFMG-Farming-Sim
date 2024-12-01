@@ -79,6 +79,7 @@ public class RaritySetter : MonoBehaviour
         this.cropComponentReference = cropComponentReference;
         foreach (Rarity rarity in rarities)
         {
+            Debug.Log(rarity.RarityID);
             if (randomNumber >= rarity.RarityProbability)
             {
                 this.DisplayRarity(rarity.RarityID);
@@ -107,5 +108,28 @@ public class RaritySetter : MonoBehaviour
         }
         else
             Debug.LogError("RARITY INDICATOR WAS NOT APPLIED");
+    }
+    private bool IsFertileInCurrentSeason()
+    {
+        bool isFertile = false;
+
+        if (ActiveSeasonManager.Instance.ActiveSeason.FertileCrops.Exists(fertileCrop => fertileCrop == this.cropComponentReference.CropID))
+        {
+            isFertile = true;
+        }
+
+        return isFertile;
+    }
+
+    private bool IsInfertileInCurrentSeason()
+    {
+        bool isInfertile = false;
+
+        if (ActiveSeasonManager.Instance.ActiveSeason.InfertileCrops.Exists(infertileCrop => infertileCrop == this.cropComponentReference.CropID))
+        {
+            isInfertile = true;
+        }
+
+        return isInfertile;
     }
 }

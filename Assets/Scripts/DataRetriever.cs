@@ -200,6 +200,7 @@ public class DataRetriever : MonoBehaviour
         Debug.LogError("NO CROP ASSET DIRECTORY WAS RETRIEVED");
         return "";
     }
+    //@TODO
     public async Task<string> RetrieveCropAssetDirectory(int cropID)
     {
         switch (cropID)
@@ -242,9 +243,21 @@ public class DataRetriever : MonoBehaviour
 
         return plotAreas;
     }
-
+    //@TODO
     public int RetrieveAvailableCropCount()
     {
         return 12;
+    }
+    //@TODO
+    public List<Season> RetrieveSeasons()
+    {
+        List<Season> seasons = new List<Season>();
+
+        seasons.Add(new Season(1, "Spring", new List<int> {1, 5, 9}, new List<int> { 3, 4, 11}, 3, "Sprites/Seasons/Spring", new Color(179, 217, 44, 255f)));
+        seasons.Add(new Season(2, "Summer", new List<int> {2, 4, 3, 7}, new List<int> { 8,9,10}, 3, "Sprites/Seasons/Summer", new Color(255, 207, 9, 255)));
+        seasons.Add(new Season(3, "Fall", new List<int> {6, 8, 11, 12}, new List<int> { 2, 5}, 3, "Sprites/Seasons/Fall", new Color(232, 96, 22, 255f)));
+        seasons.Add(new Season(4, "Winter", new List<int> {10}, new List<int> {1, 3, 4, 7}, 3, "Sprites/Seasons/Winter", new Color(0, 177, 232, 255f)));
+
+        return seasons;
     }
 }

@@ -9,11 +9,12 @@ public class PlotAreaRetriever : MonoBehaviour
     public List<PlotArea> AvailablePlotAreas = new();
 
     public PlotArea CurrentPlotArea;
-    public string CurrentPlotName = "";
+    private string currentPlotName = "";
+    public string CurrentPlotName {  get { return currentPlotName; } }
     public bool PlotAreaDataHasChanged = false;
     private void Awake()
     {
-        if(Instance == null)
+        if (Instance == null)
             Instance = this;
         else
             Destroy(gameObject);
@@ -21,6 +22,12 @@ public class PlotAreaRetriever : MonoBehaviour
     private void Start()
     {
         this.AvailablePlotAreas = this.RetrievePlotAreas();
+    }
+    public void SetCurrentPlotName(string plotName)
+    {
+        this.currentPlotName = plotName;
+
+        this.LogCurrentPlotArea(plotName);
     }
     private void OnEnable()
     {
@@ -49,7 +56,7 @@ public class PlotAreaRetriever : MonoBehaviour
     public void LogCurrentPlotArea(string currentPlotAreaName)
     {
         this.CurrentPlotArea = this.AvailablePlotAreas.Find(plotName => plotName.PlotName == currentPlotAreaName);
-        this.CurrentPlotName = currentPlotAreaName;
+        this.currentPlotName = currentPlotAreaName;
         Debug.Log("Current plot area logged (" + currentPlotAreaName + ")");
     }
 }

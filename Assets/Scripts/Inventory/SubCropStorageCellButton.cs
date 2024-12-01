@@ -15,7 +15,7 @@ public class SubCropStorageCellButton : BaseButton
 
     private CropProducer cropProducerReference;
 
-    private int quantity = 0;
+    private int quantity = 1;
     private TextMeshProUGUI quantityTMPDisplay;
 
     public void Initialize(QualityData quality, Crop storingCrop, CropStorageCellButton parentCreator)

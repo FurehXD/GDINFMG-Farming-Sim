@@ -13,7 +13,7 @@ public class PlotAreaBroadcaster : MonoBehaviour
         this.plotDropdown = this.GetComponent<TMP_Dropdown>();
 
         if(this.plotDropdown != null && PlotAreaRetriever.Instance)
-            PlotAreaRetriever.Instance.CurrentPlotName =  this.plotDropdown.options[this.plotDropdown.value].text;
+            PlotAreaRetriever.Instance.SetCurrentPlotName(this.plotDropdown.options[this.plotDropdown.value].text);
     }
     public void AcquireChangedPlot()
     {
