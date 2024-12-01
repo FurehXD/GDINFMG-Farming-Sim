@@ -46,7 +46,7 @@ public class DataRetriever : MonoBehaviour
         }
     }
 
-    public async Task<int> RetrieveGrowthID(int cropID)
+    public async Task<int> RetrieveCropGrowthID(int cropID)
     {
         try
         {
@@ -94,7 +94,7 @@ public class DataRetriever : MonoBehaviour
         }
     }
 
-    public async Task<int> RetrieveMarketID(int cropID)
+    public async Task<int> RetrieveCropMarketID(int cropID)
     {
         try
         {
@@ -118,7 +118,7 @@ public class DataRetriever : MonoBehaviour
         }
     }
 
-    public async Task<decimal> RetrieveSellingPrice(int marketID)
+    public async Task<decimal> RetrieveCropSellingPrice(int marketID)
     {
         try
         {

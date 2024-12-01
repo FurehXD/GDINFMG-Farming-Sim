@@ -39,10 +39,10 @@ public class Crop : MonoBehaviour
                 cropName = await DataRetriever.Instance.RetrieveCropName(cropID);
                 cropAssetDirectory = DataRetriever.Instance.RetrieveCropAssetDirectory(cropID);
                 cropIcon = Resources.Load<Sprite>(cropAssetDirectory);
-                growthID = await DataRetriever.Instance.RetrieveGrowthID(cropID);
+                growthID = await DataRetriever.Instance.RetrieveCropGrowthID(cropID);
                 growthRate = await DataRetriever.Instance.RetrieveCropGrowthRate(growthID);
-                marketID = await DataRetriever.Instance.RetrieveMarketID(cropID);
-                sellingPrice = await DataRetriever.Instance.RetrieveSellingPrice(marketID);
+                marketID = await DataRetriever.Instance.RetrieveCropMarketID(cropID);
+                sellingPrice = await DataRetriever.Instance.RetrieveCropSellingPrice(marketID);
             }
             catch (System.Exception e)
             {
