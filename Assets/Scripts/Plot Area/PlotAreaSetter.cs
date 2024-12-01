@@ -10,7 +10,6 @@ public class PlotAreaSetter : MonoBehaviour
     [SerializeField]
     private GridLayoutGroup farmArea;
 
-    [SerializeField]
     private List<PlotButton> plotReferences = new();
 
     private TMP_Dropdown areaSelectorDropdown;
@@ -20,22 +19,11 @@ public class PlotAreaSetter : MonoBehaviour
     {
         this.areaSelectorDropdown = this.GetComponentInChildren<TMP_Dropdown>();
         this.plots = DataRetriever.Instance.RetrievePlotAreas();
-        this.UpdateDropDown();
         this.UpdateGameLocation();
     }
     private void Update()
     {
         this.plots = DataRetriever.Instance.RetrievePlotAreas();
-        this.UpdateDropDown();
-    }
-    private void UpdateDropDown()
-    {
-        this.areaSelectorDropdown.options.Clear();
-        foreach(PlotArea plotArea in this.plots)
-        { 
-            this.areaSelectorDropdown.options.Add(new TMP_Dropdown.OptionData(plotArea.PlotName));
-            this.areaSelectorDropdown.RefreshShownValue();
-        }
     }
     public void UpdateGameLocation()
     {

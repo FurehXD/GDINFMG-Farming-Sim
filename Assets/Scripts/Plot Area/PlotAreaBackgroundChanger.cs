@@ -20,7 +20,7 @@ public class PlotAreaBackgroundChanger : MonoBehaviour
     }
     private void ChangeBackground(string currentPlotAreaName)
     {
-        PlotArea currentPlotArea = PlotAreaSingleton.Instance.CurrentPlotArea;
+        PlotArea currentPlotArea = PlotAreaRetriever.Instance.CurrentPlotArea;
 
         string plotAssetFolder = currentPlotArea.AssetDirectory;
 

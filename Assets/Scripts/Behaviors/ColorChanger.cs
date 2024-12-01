@@ -32,6 +32,6 @@ public class ColorChanger : MonoBehaviour
     public void ResetColor(PlotButton plotButton)
     {
         //if (plotButton.transform.parent != this.transform.parent)
-            this.ResetColor();
+            //this.ResetColor();
     }
 }

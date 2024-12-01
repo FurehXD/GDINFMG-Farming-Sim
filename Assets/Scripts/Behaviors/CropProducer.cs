@@ -68,8 +68,8 @@ public class CropProducer : MonoBehaviour
     private float CalculateGrowthTime()
     {
         float growthTime = this.baseGrowthRate;
-        Debug.Log("in here: " + PlotAreaSingleton.Instance.CurrentPlotArea.PlotName);
-        float plotAreaGrowthFactor = PlotAreaSingleton.Instance.CurrentPlotArea.GrowthBuffPercentage - 1;
+        //Debug.Log("in here: " + PlotAreaRetriever.Instance.CurrentPlotArea.PlotName);
+        float plotAreaGrowthFactor = PlotAreaRetriever.Instance.CurrentPlotArea.GrowthBuffPercentage - 1;
 
         growthTime = this.baseGrowthRate / this.growthRate;
         float timeLost = growthTime * plotAreaGrowthFactor;
