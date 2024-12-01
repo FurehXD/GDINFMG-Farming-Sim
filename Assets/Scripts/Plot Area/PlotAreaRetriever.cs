@@ -17,9 +17,6 @@ public class PlotAreaRetriever : MonoBehaviour
             Instance = this;
         else
             Destroy(gameObject);
-
-        Debug.Log("HI: ");
-        Debug.Log(this.AvailablePlotAreas.Count);
     }
     private void Start()
     {

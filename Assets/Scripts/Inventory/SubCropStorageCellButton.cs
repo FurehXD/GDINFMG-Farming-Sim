@@ -9,12 +9,13 @@ public class SubCropStorageCellButton : BaseButton
 
     private bool hasBeenInitialized = false;
     private QualityData quality;
+    public QualityData Quality {  get { return quality; } }
 
     private Crop cropItStores;
 
     private CropProducer cropProducerReference;
 
-    private int quantity = 1;
+    private int quantity = 0;
     private TextMeshProUGUI quantityTMPDisplay;
 
     public void Initialize(QualityData quality, Crop storingCrop, CropStorageCellButton parentCreator)
@@ -65,5 +66,9 @@ public class SubCropStorageCellButton : BaseButton
         this.cropProducerReference = InventoryManager.Instance.CropProducerReference;
 
         this.cropProducerReference.StartProduction(this.cropItStores);
+    }
+    public void StoreBoughtItem()
+    {
+        this.quantity++;
     }
 }

@@ -113,4 +113,13 @@ public class CropStorageCellButton : BaseButton
             this.subStorageIsOpen = false;
         }
     }
+    public void StoreBoughtItem(QualityData qualityData)
+    {
+        if(this.childButtonReferences != null && this.childButtonReferences.Count > 0)
+        {
+            SubCropStorageCellButton subCropStorageCellButton = this.childButtonReferences.Find(child => child.Quality == qualityData);
+
+            subCropStorageCellButton.StoreBoughtItem();
+        }
+    }
 }

@@ -190,7 +190,7 @@ public class DataRetriever : MonoBehaviour
         return await dbManager.GetQualities();
     }
 
-    public string RetrieveCropAssetDirectory(int cropID)
+    public string RetrieveCropAssetDirectoryTemp(int cropID)
     {
         switch (cropID)
         {
@@ -199,6 +199,36 @@ public class DataRetriever : MonoBehaviour
         }
         Debug.LogError("NO CROP ASSET DIRECTORY WAS RETRIEVED");
         return "";
+    }
+    public async Task<string> RetrieveCropAssetDirectory(int cropID)
+    {
+        switch (cropID)
+        {
+            case 1:
+                return "Sprites/Crops/Apple/Apple";
+        }
+        Debug.LogError("NO CROP ASSET DIRECTORY WAS RETRIEVED");
+        return "";
+        //try
+        //{
+        //    using (SqlConnection connection = new SqlConnection(dbManager.ConnectionString))
+        //    {
+        //        await connection.OpenAsync();
+        //        string query = "SELECT AssetDirectory FROM Crops WHERE CropID = @CropID";
+
+        //        using (SqlCommand command = new SqlCommand(query, connection))
+        //        {
+        //            command.Parameters.AddWithValue("@CropID", cropID);
+        //            var result = await command.ExecuteScalarAsync();
+        //            return result?.ToString() ?? "";
+        //        }
+        //    }
+        //}
+        //catch (Exception e)
+        //{
+        //    Debug.LogError($"Error retrieving crop name: {e.Message}");
+        //    return "";
+        //}
     }
 
     //@TODO
@@ -211,5 +241,10 @@ public class DataRetriever : MonoBehaviour
         plotAreas.Add(new PlotArea(3, "Lakeside", 1.0f, new Vector2(6,5), "Sprites/Plot Area/Lakeside"));
 
         return plotAreas;
+    }
+
+    public int RetrieveAvailableCropCount()
+    {
+        return 12;
     }
 }
