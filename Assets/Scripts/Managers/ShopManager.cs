@@ -48,6 +48,21 @@ public class ShopManager : MonoBehaviour {
         return false;
     }
 
+    public void BuySeed(int seedID) {
+        //get item form database using id
+        //add crop to inventory
+        //if(this.CheckPurchase(cost)) {
+            //randomize quality
+            //add to inventory
+            //change text to say purchase bought
+        //}
+        //else {
+            //change text to say fail
+        //}
+        Debug.Log("Success");
+        this._purchaseMessage.text = "Purchase successful.";
+    }
+
     public void BuyItem(string itemID) {
         //get item form database using id
         //add crop to inventory
@@ -60,5 +75,26 @@ public class ShopManager : MonoBehaviour {
         //}
         Debug.Log("Success");
         this._purchaseMessage.text = "Purchase successful.";
+    }
+
+    public int RandomizeQuality() {
+        int numHold = Random.Range(1, 100);
+        int qualityID = 3;
+        if (numHold > 0 && numHold < 10) {
+            qualityID = 1;
+        }
+        else if (numHold > 11 && numHold < 35) {
+            qualityID = 2;
+        }
+        else if (numHold > 36 && numHold < 65) {
+            qualityID = 3;
+        }
+        else if (numHold > 66 && numHold < 90) {
+            qualityID = 4;
+        }
+        else if (numHold > 91 && numHold < 100) {
+            qualityID = 5;
+        }
+        return qualityID;
     }
 }
