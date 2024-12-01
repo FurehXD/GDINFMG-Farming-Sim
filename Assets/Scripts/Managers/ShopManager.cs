@@ -59,5 +59,6 @@ public class ShopManager : MonoBehaviour {
             //change text to say fail
         //}
         Debug.Log("Success");
+        this._purchaseMessage.text = "Purchase successful.";
     }
 }
