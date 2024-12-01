@@ -7,7 +7,15 @@ public class CropButton : BaseButton{
         get { return this.cropName; }
     }
 
-    public string SelectCrop() {
-        return this.cropName;
+    [SerializeField]
+    private int cropID;
+    public int CropID {
+        get { return this.cropID; }
+    }
+
+    public void SelectCrop() {
+        //get crop form database using crop id
+        //add crop to inventory
+        Debug.Log("Success");
     }
 }
