@@ -197,7 +197,8 @@ MonoBehaviour:
   - {fileID: 1705372387}
   - {fileID: 1116931523}
   _fertilizerButtons: []
-  _upgradeButtons: []
+  _upgradeButtons:
+  - {fileID: 1881527387}
   _confirmButton: {fileID: 754504659}
   _returnButton: {fileID: 1369416334}
   _purchaseMessage: {fileID: 1756964173}
