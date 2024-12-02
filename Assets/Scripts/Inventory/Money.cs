@@ -6,10 +6,12 @@ public class Money : MonoBehaviour
     public static Money Instance;
 
     private TextMeshProUGUI moneyDisplay;
+    [SerializeField]
+    [Range(0, 999)]
+    private int startingMoney = 0;
+
     private int currentMoney = 0;
-    public int CurrentMoney {
-        get {return this.currentMoney; }  
-    }
+    public int CurrentMoney { get { return this.currentMoney; } }
     private void Awake()
     {
         if (Instance == null)
@@ -19,6 +21,7 @@ public class Money : MonoBehaviour
     }
     private void Start()
     {
+        this.currentMoney = this.startingMoney;
         this.moneyDisplay = this.GetComponent<TextMeshProUGUI>();
     }
     private void Update()
