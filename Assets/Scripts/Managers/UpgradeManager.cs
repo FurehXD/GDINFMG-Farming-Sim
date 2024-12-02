@@ -12,7 +12,7 @@ public class UpgradeManager : MonoBehaviour {
         get { return this.fertilizerBoost; }
     }
     [SerializeField] private int sellValueBoost;
-    public float SellValueBoost {
+    public int SellValueBoost {
         get { return this.sellValueBoost; }
     }
     [SerializeField] private int yieldAmount;

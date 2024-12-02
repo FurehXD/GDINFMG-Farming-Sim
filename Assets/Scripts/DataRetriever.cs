@@ -193,7 +193,7 @@ public class DataRetriever : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.LogError($"Error retrieving selling price: {e.Message}");
+            Debug.LogError($"Error retrieving purchasing price: {e.Message}");
             return 0;
         }
     }

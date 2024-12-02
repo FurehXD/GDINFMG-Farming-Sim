@@ -1892,6 +1892,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f678e00826b63044eb6a4c66b53763df, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  inventoryUI: {fileID: 613072977}
+  farmAreaUI: {fileID: 1223035414}
 --- !u!4 &660682337
 Transform:
   m_ObjectHideFlags: 0
@@ -2169,6 +2171,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 527d4c6bd8c154144bb82a1eef6d0508, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  rarityBoost: 0
+  fertilizerBoost: 0
+  sellValueBoost: 0
+  yieldAmount: 0
 --- !u!4 &776749222
 Transform:
   m_ObjectHideFlags: 0
