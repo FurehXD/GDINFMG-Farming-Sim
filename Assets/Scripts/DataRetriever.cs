@@ -241,6 +241,29 @@ public class DataRetriever : MonoBehaviour
         return rarities;
     }
 
+    public async Task<Rarity> RetrieveHighestRarity()
+    {
+        try
+        {
+            List<Rarity> rarities = await RetrieveRarities();
+            if (rarities == null || rarities.Count == 0)
+            {
+                Debug.LogError("No rarities found in database");
+                return null;
+            }
+
+            // Get the rarity with the highest probability
+            Rarity highestRarity = rarities.OrderByDescending(r => r.RarityProbability).First();
+            Debug.Log($"Highest probability rarity: {highestRarity.RarityType} with probability: {highestRarity.RarityProbability}");
+            return highestRarity;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Error retrieving highest rarity: {e.Message}");
+            return null;
+        }
+    }
+
     public async Task<List<QualityData>> RetrieveQualities()
     {
         return await dbManager.GetQualities();
