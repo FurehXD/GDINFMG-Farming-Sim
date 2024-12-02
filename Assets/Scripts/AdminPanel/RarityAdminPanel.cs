@@ -10,65 +10,109 @@ public class RarityAdminPanel : BaseAdminPanel
     private float rarityPriceBuff = 0f;
     private float rarityProbability = 0f;
     private Color rarityColor = Color.white;
+    private Texture2D colorPreviewTexture;
 
     private void OnGUI()
     {
         if (!gameObject.activeSelf) return;
 
+        // Draw the background
+        GUI.Box(new Rect(0, 0, Screen.width, Screen.height), GUIContent.none, GUI.skin.box);
+
+        // Begin the main area
         GUILayout.BeginArea(new Rect(10, 10, Screen.width - 20, Screen.height - 20));
+
+        // Begin the scroll view
         scrollPosition = GUILayout.BeginScrollView(scrollPosition);
 
-        GUILayout.Label("Rarity Management Panel", GUI.skin.box);
+        // Header
+        GUILayout.Box("Rarity Management Panel", GUILayout.ExpandWidth(true));
 
+        // Status message if any
         if (!string.IsNullOrEmpty(operationStatus))
         {
-            GUILayout.Label(operationStatus, GUI.skin.box);
+            GUILayout.Box(operationStatus, GUILayout.ExpandWidth(true));
         }
 
-        // Show current data
-        GUILayout.Label("Current Rarities", GUI.skin.box);
-        DrawDataTable();
+        // Display current data
+        GUILayout.Box("Current Rarities", GUILayout.ExpandWidth(true));
+        if (currentData != null && currentData.Rows.Count > 0)
+        {
+            // Headers
+            GUILayout.BeginHorizontal();
+            foreach (DataColumn column in currentData.Columns)
+            {
+                GUILayout.Box(column.ColumnName, GUILayout.Width(120));
+            }
+            GUILayout.EndHorizontal();
+
+            // Data rows
+            foreach (DataRow row in currentData.Rows)
+            {
+                GUILayout.BeginHorizontal();
+                foreach (var item in row.ItemArray)
+                {
+                    GUILayout.Box(item.ToString(), GUILayout.Width(120));
+                }
+                GUILayout.EndHorizontal();
+            }
+        }
+        else
+        {
+            GUILayout.Label("No data available");
+        }
 
         // Add new rarity section
         GUILayout.Space(20);
-        GUILayout.Label("Add New Rarity", GUI.skin.box);
+        GUILayout.Box("Add New Rarity", GUILayout.ExpandWidth(true));
+
+        GUILayout.BeginVertical(GUI.skin.box);
 
         GUILayout.Label("Rarity Type:");
         rarityType = GUILayout.TextField(rarityType, GUILayout.Width(200));
 
         GUILayout.Label("Price Buff %:");
-        float.TryParse(GUILayout.TextField(rarityPriceBuff.ToString(), GUILayout.Width(100)), out rarityPriceBuff);
+        string priceBuffStr = GUILayout.TextField(rarityPriceBuff.ToString(), GUILayout.Width(100));
+        float.TryParse(priceBuffStr, out rarityPriceBuff);
 
         GUILayout.Label("Probability %:");
-        float.TryParse(GUILayout.TextField(rarityProbability.ToString(), GUILayout.Width(100)), out rarityProbability);
+        string probStr = GUILayout.TextField(rarityProbability.ToString(), GUILayout.Width(100));
+        float.TryParse(probStr, out rarityProbability);
 
         GUILayout.Label("Rarity Color:");
         GUILayout.BeginHorizontal();
-        GUILayout.Label("R:");
-        float.TryParse(GUILayout.TextField(rarityColor.r.ToString(), GUILayout.Width(50)), out float r);
-        rarityColor.r = Mathf.Clamp01(r);
+        GUILayout.Label("R:", GUILayout.Width(20));
+        string rStr = GUILayout.TextField((rarityColor.r * 255).ToString(), GUILayout.Width(50));
+        float.TryParse(rStr, out float r);
+        rarityColor.r = Mathf.Clamp01(r / 255f);
 
-        GUILayout.Label("G:");
-        float.TryParse(GUILayout.TextField(rarityColor.g.ToString(), GUILayout.Width(50)), out float g);
-        rarityColor.g = Mathf.Clamp01(g);
+        GUILayout.Label("G:", GUILayout.Width(20));
+        string gStr = GUILayout.TextField((rarityColor.g * 255).ToString(), GUILayout.Width(50));
+        float.TryParse(gStr, out float g);
+        rarityColor.g = Mathf.Clamp01(g / 255f);
 
-        GUILayout.Label("B:");
-        float.TryParse(GUILayout.TextField(rarityColor.b.ToString(), GUILayout.Width(50)), out float b);
-        rarityColor.b = Mathf.Clamp01(b);
+        GUILayout.Label("B:", GUILayout.Width(20));
+        string bStr = GUILayout.TextField((rarityColor.b * 255).ToString(), GUILayout.Width(50));
+        float.TryParse(bStr, out float b);
+        rarityColor.b = Mathf.Clamp01(b / 255f);
         GUILayout.EndHorizontal();
 
         // Color preview
-        Texture2D colorPreview = new Texture2D(1, 1);
-        colorPreview.SetPixel(0, 0, rarityColor);
-        colorPreview.Apply();
-        GUILayout.Box(colorPreview, GUILayout.Width(100), GUILayout.Height(20));
+        GUILayout.Label("Color Preview:");
+        if (colorPreviewTexture != null) Destroy(colorPreviewTexture);
+        colorPreviewTexture = new Texture2D(1, 1);
+        colorPreviewTexture.SetPixel(0, 0, rarityColor);
+        colorPreviewTexture.Apply();
+        GUILayout.Box(colorPreviewTexture, GUILayout.Width(100), GUILayout.Height(20));
 
         GUI.enabled = !isOperationInProgress;
-        if (GUILayout.Button("Add Rarity"))
+        if (GUILayout.Button("Add Rarity", GUILayout.Width(100)))
         {
             ProcessAsyncOperation(InsertRarity());
         }
         GUI.enabled = true;
+
+        GUILayout.EndVertical();
 
         GUILayout.EndScrollView();
         GUILayout.EndArea();
@@ -83,10 +127,10 @@ public class RarityAdminPanel : BaseAdminPanel
                 await connection.OpenAsync();
                 string query = @"
                     SELECT 
-                        RarityType,
-                        PriceBuffPercentage,
-                        Probability,
-                        CONCAT(RarityColorRed, ', ', RarityColorGreen, ', ', RarityColorBlue) as Color
+                        RarityType as 'Type',
+                        PriceBuffPercentage as 'Price Buff %',
+                        Probability as 'Probability %',
+                        CONCAT(RarityColorRed, ', ', RarityColorGreen, ', ', RarityColorBlue) as 'RGB Color'
                     FROM Rarity
                     ORDER BY Probability DESC";
 
@@ -126,12 +170,28 @@ public class RarityAdminPanel : BaseAdminPanel
                     await command.ExecuteNonQueryAsync();
                 }
             }
-            Debug.Log("Rarity added successfully!");
+            ClearInputs();
         }
         catch (Exception e)
         {
             Debug.LogError($"Error inserting rarity: {e.Message}");
             throw;
+        }
+    }
+
+    private void ClearInputs()
+    {
+        rarityType = "";
+        rarityPriceBuff = 0f;
+        rarityProbability = 0f;
+        rarityColor = Color.white;
+    }
+
+    private void OnDestroy()
+    {
+        if (colorPreviewTexture != null)
+        {
+            Destroy(colorPreviewTexture);
         }
     }
 }

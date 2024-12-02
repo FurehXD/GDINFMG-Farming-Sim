@@ -13,38 +13,79 @@ public class QualityAdminPanel : BaseAdminPanel
     {
         if (!gameObject.activeSelf) return;
 
+        // Draw the background
+        GUI.Box(new Rect(0, 0, Screen.width, Screen.height), GUIContent.none, GUI.skin.box);
+
+        // Begin the main area
         GUILayout.BeginArea(new Rect(10, 10, Screen.width - 20, Screen.height - 20));
+
+        // Begin the scroll view
         scrollPosition = GUILayout.BeginScrollView(scrollPosition);
 
-        GUILayout.Label("Quality Management Panel", GUI.skin.box);
+        // Header
+        GUILayout.Box("Quality Management Panel", GUILayout.ExpandWidth(true));
 
+        // Status message if any
         if (!string.IsNullOrEmpty(operationStatus))
         {
-            GUILayout.Label(operationStatus, GUI.skin.box);
+            GUILayout.Box(operationStatus, GUILayout.ExpandWidth(true));
         }
 
-        // Show current data
-        GUILayout.Label("Current Qualities", GUI.skin.box);
-        DrawDataTable();
+        // Display current data
+        GUILayout.Box("Current Qualities", GUILayout.ExpandWidth(true));
+        if (currentData != null && currentData.Rows.Count > 0)
+        {
+            // Headers
+            GUILayout.BeginHorizontal();
+            foreach (DataColumn column in currentData.Columns)
+            {
+                GUILayout.Box(column.ColumnName, GUILayout.Width(120));
+            }
+            GUILayout.EndHorizontal();
+
+            // Data rows
+            foreach (DataRow row in currentData.Rows)
+            {
+                GUILayout.BeginHorizontal();
+                foreach (var item in row.ItemArray)
+                {
+                    GUILayout.Box(item.ToString(), GUILayout.Width(120));
+                }
+                GUILayout.EndHorizontal();
+            }
+        }
+        else
+        {
+            GUILayout.Label("No data available");
+        }
 
         // Add new quality section
         GUILayout.Space(20);
-        GUILayout.Label("Add New Quality", GUI.skin.box);
+        GUILayout.Box("Add New Quality", GUILayout.ExpandWidth(true));
+
+        // Input fields
+        GUILayout.BeginVertical(GUI.skin.box);
 
         GUILayout.Label("Quality Name:");
         qualityName = GUILayout.TextField(qualityName, GUILayout.Width(200));
 
         GUILayout.Label("Growth Rate Buff %:");
-        float.TryParse(GUILayout.TextField(qualityGrowthBuff.ToString(), GUILayout.Width(100)), out qualityGrowthBuff);
+        string buffString = GUILayout.TextField(qualityGrowthBuff.ToString(), GUILayout.Width(100));
+        float.TryParse(buffString, out qualityGrowthBuff);
 
         GUI.enabled = !isOperationInProgress;
-        if (GUILayout.Button("Add Quality"))
+        if (GUILayout.Button("Add Quality", GUILayout.Width(100)))
         {
             ProcessAsyncOperation(InsertQuality());
         }
         GUI.enabled = true;
 
+        GUILayout.EndVertical();
+
+        // End the scroll view
         GUILayout.EndScrollView();
+
+        // End the main area
         GUILayout.EndArea();
     }
 
@@ -55,13 +96,20 @@ public class QualityAdminPanel : BaseAdminPanel
             using (var connection = new SqlConnection(DatabaseManager.Instance.ConnectionString))
             {
                 await connection.OpenAsync();
-                string query = "SELECT QualityID, QualityName, GrowthRateBuffPercentage FROM Quality ORDER BY QualityID";
+                string query = @"
+                    SELECT 
+                        QualityID as 'ID',
+                        QualityName as 'Name',
+                        GrowthRateBuffPercentage as 'Growth Buff %'
+                    FROM Quality
+                    ORDER BY QualityID";
 
                 using (var command = new SqlCommand(query, connection))
                 {
                     var adapter = new SqlDataAdapter(command);
                     currentData = new DataTable();
                     adapter.Fill(currentData);
+                    Debug.Log($"Loaded {currentData.Rows.Count} quality records");
                 }
             }
         }
@@ -74,19 +122,24 @@ public class QualityAdminPanel : BaseAdminPanel
 
     private async Task InsertQuality()
     {
+        if (string.IsNullOrEmpty(qualityName))
+        {
+            throw new Exception("Quality name cannot be empty");
+        }
+
         try
         {
             using (var connection = new SqlConnection(DatabaseManager.Instance.ConnectionString))
             {
                 await connection.OpenAsync();
 
-                string getMaxIdQuery = "SELECT MAX(QualityID) FROM Quality";
+                string getMaxIdQuery = "SELECT ISNULL(MAX(QualityID), 0) FROM Quality";
                 int nextId;
 
                 using (var command = new SqlCommand(getMaxIdQuery, connection))
                 {
                     var result = await command.ExecuteScalarAsync();
-                    nextId = (result != DBNull.Value ? Convert.ToInt32(result) : 0) + 1;
+                    nextId = Convert.ToInt32(result) + 1;
                 }
 
                 string insertQuery = "INSERT INTO Quality (QualityID, QualityName, GrowthRateBuffPercentage) VALUES (@ID, @Name, @Buff)";
@@ -98,13 +151,21 @@ public class QualityAdminPanel : BaseAdminPanel
                     command.Parameters.AddWithValue("@Buff", qualityGrowthBuff);
                     await command.ExecuteNonQueryAsync();
                 }
+
+                Debug.Log($"Successfully inserted quality: {qualityName}");
+                ClearInputs();
             }
-            Debug.Log("Quality added successfully!");
         }
         catch (Exception e)
         {
             Debug.LogError($"Error inserting quality: {e.Message}");
             throw;
         }
+    }
+
+    private void ClearInputs()
+    {
+        qualityName = "";
+        qualityGrowthBuff = 0f;
     }
 }

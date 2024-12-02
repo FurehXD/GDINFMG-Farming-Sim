@@ -21,6 +21,37 @@ public class DataRetriever : MonoBehaviour
         }
         else
             Destroy(gameObject);
+        
+    }
+
+    public async Task<List<int>> RetrieveAllCropIDs()
+    {
+        List<int> cropIDs = new List<int>();
+        try
+        {
+            using (SqlConnection connection = new SqlConnection(dbManager.ConnectionString))
+            {
+                await connection.OpenAsync();
+                string query = "SELECT CropID FROM Crops";
+
+                using (SqlCommand command = new SqlCommand(query, connection))
+                using (SqlDataReader reader = await command.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        cropIDs.Add(Convert.ToInt32(reader["CropID"]));
+                    }
+                }
+
+                Debug.Log($"Retrieved {cropIDs.Count} crop IDs from the database");
+                return cropIDs;
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Error retrieving crop IDs: {e.Message}");
+            return new List<int>();
+        }
     }
 
     public async Task<float> RetrieveCropGrowthRate(int growthID)
@@ -251,11 +282,12 @@ public class DataRetriever : MonoBehaviour
             {
                 await connection.OpenAsync();
                 string query = "SELECT COUNT(*) FROM Assets WHERE AssetPath LIKE 'Sprites/Crops/%'";
-
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     var result = await command.ExecuteScalarAsync();
-                    return result != null ? Convert.ToInt32(result) : 0;
+                    int cropCount = result != null ? Convert.ToInt32(result) : 0;
+                    Debug.Log($"Found {cropCount} available crops in the database");
+                    return cropCount;
                 }
             }
         }
