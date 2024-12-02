@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System;
+using System.Linq;
 /*
  * Retrives Data from the database then assigns it to any respective attribute
  */
@@ -227,33 +228,31 @@ public class DataRetriever : MonoBehaviour
     //@TODO
     public async Task<string> RetrieveCropAssetDirectory(int cropID)
     {
-        switch (cropID)
+        try
         {
-            case 1:
-                return "Sprites/Crops/Apple/Apple";
-        }
-        Debug.LogError("NO CROP ASSET DIRECTORY WAS RETRIEVED");
-        return "";
-        //try
-        //{
-        //    using (SqlConnection connection = new SqlConnection(dbManager.ConnectionString))
-        //    {
-        //        await connection.OpenAsync();
-        //        string query = "SELECT AssetDirectory FROM Crops WHERE CropID = @CropID";
+            using (SqlConnection connection = new SqlConnection(dbManager.ConnectionString))
+            {
+                await connection.OpenAsync();
+                string query = "SELECT AssetPath FROM Assets WHERE AssetID = @AssetID";
 
-        //        using (SqlCommand command = new SqlCommand(query, connection))
-        //        {
-        //            command.Parameters.AddWithValue("@CropID", cropID);
-        //            var result = await command.ExecuteScalarAsync();
-        //            return result?.ToString() ?? "";
-        //        }
-        //    }
-        //}
-        //catch (Exception e)
-        //{
-        //    Debug.LogError($"Error retrieving crop name: {e.Message}");
-        //    return "";
-        //}
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@AssetID", cropID);
+                    var result = await command.ExecuteScalarAsync();
+                    if (result == null)
+                    {
+                        Debug.LogError($"No asset found for CropID: {cropID}");
+                        return "";
+                    }
+                    return result.ToString();
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Error retrieving asset directory: {e.Message}");
+            return "";
+        }
     }
 
     //@TODO
@@ -268,19 +267,93 @@ public class DataRetriever : MonoBehaviour
         return plotAreas;
     }
     //@TODO
-    public int RetrieveAvailableCropCount()
+    public async Task<int> RetrieveAvailableCropCount()
     {
-        return 12;
+        try
+        {
+            using (SqlConnection connection = new SqlConnection(dbManager.ConnectionString))
+            {
+                await connection.OpenAsync();
+                string query = "SELECT COUNT(*) FROM Assets WHERE AssetPath LIKE 'Sprites/Crops/%'";
+
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    var result = await command.ExecuteScalarAsync();
+                    return result != null ? Convert.ToInt32(result) : 0;
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Error retrieving available crop count: {e.Message}");
+            return 0;
+        }
     }
+
     //@TODO
-    public List<Season> RetrieveSeasons()
+    public async Task<List<Season>> RetrieveSeasons()
     {
         List<Season> seasons = new List<Season>();
+        try
+        {
+            using (SqlConnection connection = new SqlConnection(dbManager.ConnectionString))
+            {
+                await connection.OpenAsync();
+                string query = @"
+                SELECT 
+                    SeasonID,
+                    SeasonName,
+                    FertileCrops,
+                    InfertileCrops,
+                    Duration,
+                    ColorR,
+                    ColorG,
+                    ColorB,
+                    AssetPath
+                FROM Season s";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                using (SqlDataReader reader = await command.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        // Convert comma-separated strings to List<int>
+                        List<int> fertileCrops = reader["FertileCrops"].ToString()
+                            .Split(',')
+                            .Select(int.Parse)
+                            .ToList();
 
-        seasons.Add(new Season(1, "Spring", new List<int> {1, 5, 9}, new List<int> { 3, 4, 11}, 30, "Sprites/Seasons/Spring", new Color(179, 217, 44, 255f)));
-        seasons.Add(new Season(2, "Summer", new List<int> {2, 4, 3, 7}, new List<int> { 8,9,10}, 30, "Sprites/Seasons/Summer", new Color(255, 207, 9, 255)));
-        seasons.Add(new Season(3, "Fall", new List<int> {6, 8, 11, 12}, new List<int> { 2, 5}, 30, "Sprites/Seasons/Fall", new Color(232, 96, 22, 255f)));
-        seasons.Add(new Season(4, "Winter", new List<int> {10}, new List<int> {1, 3, 4, 7}, 30, "Sprites/Seasons/Winter", new Color(0, 177, 232, 255f)));
+                        List<int> infertileCrops = reader["InfertileCrops"].ToString()
+                            .Split(',')
+                            .Select(int.Parse)
+                            .ToList();
+
+                        // Create Unity Color from RGB values
+                        Color seasonColor = new Color(
+                            Convert.ToInt32(reader["ColorR"]) / 255f,
+                            Convert.ToInt32(reader["ColorG"]) / 255f,
+                            Convert.ToInt32(reader["ColorB"]) / 255f,
+                            1f);  // Alpha set to 1 for full opacity
+
+                        Season season = new Season(
+                            Convert.ToInt32(reader["SeasonID"]),
+                            reader["SeasonName"].ToString(),
+                            fertileCrops,
+                            infertileCrops,
+                            Convert.ToInt32(reader["Duration"]),
+                            reader["AssetPath"].ToString(),
+                            seasonColor
+                        );
+
+                        seasons.Add(season);
+                    }
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Error retrieving seasons: {e.Message}");
+            return new List<Season>();
+        }
 
         return seasons;
     }

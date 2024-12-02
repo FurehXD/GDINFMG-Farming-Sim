@@ -16,9 +16,14 @@ public class SeasonFilter : MonoBehaviour
     }
     private void Update()
     {
+        if (ActiveSeasonManager.Instance == null || !ActiveSeasonManager.Instance.IsInitialized)
+            return;
+
+        if (ActiveSeasonManager.Instance.ActiveSeason == null)
+            return;
+
         Color newColor = ActiveSeasonManager.Instance.ActiveSeason.SeasonColor;
         float normalizedAlpha = this.baseAlpha / 255f;
-
         newColor.a = normalizedAlpha;
         imageComponent.color = newColor;
     }
