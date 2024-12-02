@@ -73,9 +73,13 @@ public class InventoryManager : MonoBehaviour
     {
         Transform cropStorageParentTransform = this.cropStorageVerticalGroup.transform;
         int cropCount = await DataRetriever.Instance.RetrieveAvailableCropCount();
+        List<int> cropIDs = await DataRetriever.Instance.RetrieveAllCropIDs();
+
         this.cropStorageReferences.Clear();
         for (int i = 0; i < cropCount; i++)
         {
+            Debug.Log("cropID[i == " + i + "] -> " + cropIDs[i]);
+            this.cropStorageTemplate.SetCropIDItStores(cropIDs[i]);    
             this.cropStorageReferences.Add(Instantiate(this.cropStorageTemplate, cropStorageParentTransform));
         }
     }

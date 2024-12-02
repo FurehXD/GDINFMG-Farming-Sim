@@ -17,6 +17,9 @@ public class RaritySetter : MonoBehaviour
 
     private bool isLoading = false;
 
+    [SerializeField]
+    private float rarityMultiplier = 2f;
+
     private async void Start()
     {
         this.imageComponentReference = this.GetComponent<Image>();
@@ -24,8 +27,6 @@ public class RaritySetter : MonoBehaviour
         this.imageComponentReference.enabled = false;
         await LoadRarities();
     }
-
-
     private async void Update()
     {
         if (rarities == null && !isLoading)
@@ -77,6 +78,9 @@ public class RaritySetter : MonoBehaviour
     {
         float randomNumber = UnityEngine.Random.Range(0.01f, 1);
         this.cropComponentReference = cropComponentReference;
+
+        this.UpdateHighestRarity(this.rarityMultiplier);
+
         foreach (Rarity rarity in rarities)
         {
             Debug.Log(rarity.RarityID);
@@ -89,6 +93,55 @@ public class RaritySetter : MonoBehaviour
         }
         Debug.Log("ERROR NO RARITY ID WAS RETURNED");
         return 0;
+    }
+    public void UpdateHighestRarity(float factor)
+    {
+        Rarity highestRarity = null;
+        this.rarityMultiplier = factor;
+
+        foreach(var rarity in this.rarities)
+        {
+            highestRarity = rarity;
+        }
+
+        if(highestRarity != null)
+        {
+            float baseRarity = highestRarity.RarityProbability;
+
+            highestRarity.RarityProbability *= this.rarityMultiplier;
+
+            float rarityDifference = 0;
+
+            if(this.rarityMultiplier > 1)
+                rarityDifference = (highestRarity.RarityProbability - baseRarity);
+            else return;
+
+            int raritiesCount = this.rarities.Count - 1;
+
+            float accumulatedRarityDecrease;
+
+            if (rarityDifference > 0)
+                accumulatedRarityDecrease = rarityDifference / raritiesCount;
+            else return;
+
+            foreach(var rarity in this.rarities)
+            {
+                if(highestRarity !=  rarity)
+                {
+                    rarity.RarityProbability -= accumulatedRarityDecrease;
+                }
+            }
+        }
+        //Checking if rarity probabilities equate to 1
+        float temp = 0f;
+
+        foreach (var rarity in this.rarities)
+        {
+            temp += rarity.RarityProbability;
+        }
+
+        Debug.Log("SUMS TO 1: " + (temp == 1f));
+
     }
     private void DisplayRarity(int rarityID)
     {

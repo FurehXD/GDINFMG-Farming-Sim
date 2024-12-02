@@ -19,9 +19,8 @@ public class CropStorageCellButton : BaseButton
 
     [SerializeField]
     [Header("CropStorageCellButton")]
-    [UnityEngine.Range(1, 50)]
     private int cropIDItStores;
-    public int CropIDItStores {  get { return this.cropIDItStores; } set { this.cropIDItStores = value; } }
+    public int CropIDItStores {  get { return this.cropIDItStores; } }
 
     private Crop cropItStores;
 
@@ -121,5 +120,13 @@ public class CropStorageCellButton : BaseButton
 
             subCropStorageCellButton.StoreBoughtItem();
         }
+    }
+    public void SetCropIDItStores(int cropIDItStores)
+    {
+        if (!this.cropItStores)
+            this.cropItStores = this.GetComponentInChildren<Crop>();
+
+        this.cropIDItStores = cropIDItStores;
+        this.cropItStores.CropID = cropIDItStores;
     }
 }
