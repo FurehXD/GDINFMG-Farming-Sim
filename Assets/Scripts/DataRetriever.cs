@@ -23,7 +23,10 @@ public class DataRetriever : MonoBehaviour
             Destroy(gameObject);
         
     }
-
+    private async void Start()
+    {
+        var rarity = await RetrieveHighestRarity();
+    }
     public async Task<List<int>> RetrieveAllCropIDs()
     {
         List<int> cropIDs = new List<int>();
@@ -251,10 +254,19 @@ public class DataRetriever : MonoBehaviour
                 Debug.LogError("No rarities found in database");
                 return null;
             }
+            // Sort rarities by probability in ascending order (lowest number = highest rarity)
+            var sortedRarities = rarities.OrderBy(r => r.RarityProbability).ToList();
 
-            // Get the rarity with the highest probability
-            Rarity highestRarity = rarities.OrderByDescending(r => r.RarityProbability).First();
-            Debug.Log($"Highest probability rarity: {highestRarity.RarityType} with probability: {highestRarity.RarityProbability}");
+            Debug.Log("All rarities in ascending order of probability (lowest = highest rarity):");
+            foreach (var rarity in sortedRarities)
+            {
+                Debug.Log($"Type: {rarity.RarityType}, Probability: {rarity.RarityProbability:F2}%");
+            }
+
+            // Get the highest rarity (lowest probability)
+            Rarity highestRarity = sortedRarities.First();
+            Debug.Log($"Highest rarity: {highestRarity.RarityType} with probability: {highestRarity.RarityProbability:F2}%");
+
             return highestRarity;
         }
         catch (Exception e)
