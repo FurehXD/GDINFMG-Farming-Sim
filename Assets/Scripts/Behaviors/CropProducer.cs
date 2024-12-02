@@ -78,4 +78,8 @@ public class CropProducer : MonoBehaviour
         Debug.Log("GROWTH TIME Of " + this.cropComponentReference.CropName + " IS " + growthTime + "s");
         return growthTime;
     }
+    public void UpdateGrowthTime(float growthTimeFactor)
+    {
+        this.growthRate *= growthTimeFactor;
+    }
 }

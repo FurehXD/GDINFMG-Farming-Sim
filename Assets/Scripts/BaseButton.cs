@@ -31,7 +31,8 @@ public class BaseButton : Button, IPointerEnterHandler, IPointerExitHandler
     [Header("Bubble Descriptor Settings")]
     [SerializeField]
     protected string bubbleText = "";
-    private Image bubbleBorder;
+    [SerializeField]
+    protected Image bubbleTemplate;
     [SerializeField]
     private float bubbleRelativeScaleFactor = 0.5f;
     private bool bubbleCreated = false;
@@ -156,7 +157,7 @@ public class BaseButton : Button, IPointerEnterHandler, IPointerExitHandler
             float widthScaleFactor = this.bubbleRelativeScaleFactor;
             float heightScaleFactor = widthScaleFactor;
 
-            Image bubble = Instantiate(this.bubbleBorder, Vector3.zero, Quaternion.identity);
+            Image bubble = Instantiate(this.bubbleTemplate, Vector3.zero, Quaternion.identity);
             RectTransform bubbleRectTransform = bubble.GetComponent<RectTransform>();
             RectTransform bubbleTextRectTransform = bubble.GetComponentInChildren<TextMeshProUGUI>().GetComponent<RectTransform>();
 
@@ -296,7 +297,7 @@ public class BaseButton : Button, IPointerEnterHandler, IPointerExitHandler
     protected override void Awake()
     {
         base.Awake();
-        this.bubbleBorder = Resources.Load<GameObject>("Prefabs/UI/Bubble Template").GetComponent<Image>();
+        this.bubbleTemplate = Resources.Load<GameObject>("Prefabs/UI/Bubble Template").GetComponent<Image>();
         this.thisRectTransform = this.GetComponent<RectTransform>();
         this.enbiggenerComponent = this.GetComponent<Enbiggener>();
 
