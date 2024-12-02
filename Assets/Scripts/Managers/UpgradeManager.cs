@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class UpgradeManager : MonoBehaviour {
@@ -20,6 +21,8 @@ public class UpgradeManager : MonoBehaviour {
         get { return this.yieldAmount; }
     }
 
+
+    public static event Action<float> OnLuckyCharmBought;
     void Awake() {
         if (Instance == null) {
             Instance = this;
@@ -49,6 +52,8 @@ public class UpgradeManager : MonoBehaviour {
 
     public void LuckyCharm() {
         this.rarityBoost += 0.1f;
+
+        OnLuckyCharmBought?.Invoke(this.rarityBoost);
     }
 
     public void Pesticide() {

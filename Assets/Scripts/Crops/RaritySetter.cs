@@ -18,7 +18,7 @@ public class RaritySetter : MonoBehaviour
     private bool isLoading = false;
 
     [SerializeField]
-    private float rarityMultiplier = 2f;
+    private float seasonRarityMultiplier = 2f;
 
     private async void Start()
     {
@@ -26,6 +26,14 @@ public class RaritySetter : MonoBehaviour
         this.iconApplier = this.GetComponent<IconApplier>();
         this.imageComponentReference.enabled = false;
         await LoadRarities();
+    }
+    private void OnEnable()
+    {
+        UpgradeManager.OnLuckyCharmBought += this.UpdateHighestRarity;
+    }
+    private void OnDisable()
+    {
+        UpgradeManager.OnLuckyCharmBought -= this.UpdateHighestRarity;
     }
     private async void Update()
     {
@@ -79,7 +87,7 @@ public class RaritySetter : MonoBehaviour
         float randomNumber = UnityEngine.Random.Range(0.01f, 1);
         this.cropComponentReference = cropComponentReference;
 
-        this.UpdateHighestRarity(this.rarityMultiplier);
+        this.UpdateHighestRarity(this.seasonRarityMultiplier);
 
         foreach (Rarity rarity in rarities)
         {
@@ -94,25 +102,25 @@ public class RaritySetter : MonoBehaviour
         Debug.Log("ERROR NO RARITY ID WAS RETURNED");
         return 0;
     }
-    public void UpdateHighestRarity(float factor)
+    public async void UpdateHighestRarity(float factor)
     {
         Rarity highestRarity = null;
-        this.rarityMultiplier = factor;
+        this.seasonRarityMultiplier += factor;
 
         foreach(var rarity in this.rarities)
         {
-            highestRarity = rarity;
+            highestRarity = await DataRetriever.Instance.RetrieveHighestRarity();
         }
 
         if(highestRarity != null)
         {
             float baseRarity = highestRarity.RarityProbability;
 
-            highestRarity.RarityProbability *= this.rarityMultiplier;
+            highestRarity.RarityProbability *= this.seasonRarityMultiplier;
 
             float rarityDifference = 0;
 
-            if(this.rarityMultiplier > 1)
+            if(this.seasonRarityMultiplier > 1)
                 rarityDifference = (highestRarity.RarityProbability - baseRarity);
             else return;
 

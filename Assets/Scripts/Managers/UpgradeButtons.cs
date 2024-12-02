@@ -2,23 +2,12 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
+using System;
 
 public class UpgradeButtons : MonoBehaviour {
     [SerializeField]
     TMP_Text shopMessage;
-    [SerializeField]    public List<Button> _upgradeButtons;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
+    [SerializeField] public List<Button> _upgradeButtons;
     public bool CheckPurchase(int cost) {
         if(Money.Instance.CurrentMoney >= cost) {
             Money.Instance.Buy(cost);
