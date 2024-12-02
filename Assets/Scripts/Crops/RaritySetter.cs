@@ -91,7 +91,6 @@ public class RaritySetter : MonoBehaviour
 
         foreach (Rarity rarity in rarities)
         {
-            Debug.Log(rarity.RarityID);
             if (randomNumber >= rarity.RarityProbability)
             {
                 this.DisplayRarity(rarity.RarityID);
@@ -104,52 +103,44 @@ public class RaritySetter : MonoBehaviour
     }
     public async void UpdateHighestRarity(float factor)
     {
-        Rarity highestRarity = null;
-        this.seasonRarityMultiplier += factor;
+        Rarity highestRarity = await DataRetriever.Instance.RetrieveHighestRarity();
 
-        foreach(var rarity in this.rarities)
-        {
-            highestRarity = await DataRetriever.Instance.RetrieveHighestRarity();
-        }
-
-        if(highestRarity != null)
+        if (highestRarity != null)
         {
             float baseRarity = highestRarity.RarityProbability;
+            float newProbability = baseRarity * factor;
+            highestRarity.RarityProbability = newProbability;
 
-            highestRarity.RarityProbability *= this.seasonRarityMultiplier;
+            float rarityDifference = newProbability - baseRarity;
+            int raritiesCount = this.rarities.Count - 1;  // Excluding the one we're updating
 
-            float rarityDifference = 0;
+            Debug.Log("Rarity Difference: " +  rarityDifference);
 
-            if(this.seasonRarityMultiplier > 1)
-                rarityDifference = (highestRarity.RarityProbability - baseRarity);
-            else return;
+            float accumulatedRarityDecrease = rarityDifference / raritiesCount;
 
-            int raritiesCount = this.rarities.Count - 1;
+            Debug.Log($"Accumulated Rarity Change: {accumulatedRarityDecrease}");
 
-            float accumulatedRarityDecrease;
-
-            if (rarityDifference > 0)
-                accumulatedRarityDecrease = rarityDifference / raritiesCount;
-            else return;
-
-            foreach(var rarity in this.rarities)
+            for(int i = 0; i < this.rarities.Count; i++)
             {
-                if(highestRarity !=  rarity)
-                {
-                    rarity.RarityProbability -= accumulatedRarityDecrease;
-                }
+                if(highestRarity.RarityID != this.rarities[i].RarityID)
+                    this.rarities[i].RarityProbability -= accumulatedRarityDecrease;
+                else
+                    this.rarities[i].RarityProbability = highestRarity.RarityProbability;
+            }
+
+            // Verification
+            float total = 0f;
+            foreach (var rarity in this.rarities)
+            {
+                Debug.Log(rarity.RarityProbability);
+                total += rarity.RarityProbability;
+            }
+            Debug.Log($"Sum of probabilities: {total:F3}");
+            if (Math.Abs(total - 1f) > 0.0001f)
+            {
+                Debug.LogWarning($"Total probability not equal to 1: {total}");
             }
         }
-        //Checking if rarity probabilities equate to 1
-        float temp = 0f;
-
-        foreach (var rarity in this.rarities)
-        {
-            temp += rarity.RarityProbability;
-        }
-
-        Debug.Log("SUMS TO 1: " + (temp == 1f));
-
     }
     private void DisplayRarity(int rarityID)
     {
@@ -165,7 +156,7 @@ public class RaritySetter : MonoBehaviour
         {
             this.iconApplier.ApplyIcon(rarityIndicator);
             this.imageComponentReference.enabled = true;
-            this.imageComponentReference.color = rarity.RarityColor / 255.0f;
+            this.imageComponentReference.color = rarity.RarityColor;
         }
         else
             Debug.LogError("RARITY INDICATOR WAS NOT APPLIED");
