@@ -47,7 +47,7 @@ public class PlotAreaRetriever : MonoBehaviour
 
         if (this.PlotAreaDataHasChanged) this.AvailablePlotAreas = this.RetrievePlotAreas();
 
-        Debug.Log(this.PlotAreaDataHasChanged);
+        //Debug.Log(this.PlotAreaDataHasChanged);
     }
     private List<PlotArea> RetrievePlotAreas()
     {

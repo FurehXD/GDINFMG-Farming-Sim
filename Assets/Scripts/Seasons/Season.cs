@@ -12,18 +12,18 @@ public class Season
 
     public int SeasonDuration;
 
-    public string SeasonIconDirectory;
+    public string AssetPath;
 
     public Color SeasonColor;
 
-    public Season(int seasonID, string seasonName, List<int> fertileCrops, List<int> infertileCrops, int seasonDuration, string seasonIconDirectory, Color seasonColor)
+    public Season(int seasonID, string seasonName, List<int> fertileCrops, List<int> infertileCrops, int seasonDuration, string assetPath, Color seasonColor)
     {
         SeasonID = seasonID;
         SeasonName = seasonName;
         FertileCrops = fertileCrops;
         InfertileCrops = infertileCrops;
         SeasonDuration = seasonDuration;
-        SeasonIconDirectory = seasonIconDirectory;
+        AssetPath = assetPath;
         SeasonColor = seasonColor;
     }
 }

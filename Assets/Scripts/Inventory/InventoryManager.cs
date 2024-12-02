@@ -69,12 +69,10 @@ public class InventoryManager : MonoBehaviour
             this.cropProducerReference = this.selectedPlotReference.transform.parent.GetComponent<CropProducer>();
     }
 
-    private void AllocateExistingCrops()
+    private async void AllocateExistingCrops()
     {
         Transform cropStorageParentTransform = this.cropStorageVerticalGroup.transform;
-
-        int cropCount = DataRetriever.Instance.RetrieveAvailableCropCount();
-
+        int cropCount = await DataRetriever.Instance.RetrieveAvailableCropCount();
         this.cropStorageReferences.Clear();
         for (int i = 0; i < cropCount; i++)
         {
