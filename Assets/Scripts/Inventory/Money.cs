@@ -38,6 +38,6 @@ public class Money : MonoBehaviour
     }
     public void Sell(int earnings)
     {
-        this.currentMoney += earnings;
+        this.currentMoney += (earnings + UpgradeManager.Instance.SellValueBoost) * UpgradeManager.Instance.YieldAmount;
     }
 }

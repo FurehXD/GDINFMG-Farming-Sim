@@ -41,9 +41,11 @@ public class ShopManager : MonoBehaviour {
     public bool CheckPurchase(int cost) {
         if(Money.Instance.CurrentMoney >= cost) {
             Money.Instance.Buy(cost);
+            return true;
         }
-        else{}
-        return false;
+        else{
+            return false;
+        }
     }
 
     public async void BuySeed(int seedID) {
@@ -53,11 +55,11 @@ public class ShopManager : MonoBehaviour {
         if(this.CheckPurchase(cropPrice)) {
             InventoryManager.Instance.StoreBoughtItem(seedID, this.RandomizeQuality());
             Debug.Log("Success");
-            this._purchaseMessage.text = "Purchase of " + seedID + " successful.";
+            this._purchaseMessage.text = "Purchase of " + await DataRetriever.Instance.RetrieveCropName(seedID) + "seed successful.";
         }
         else {
             Debug.Log("Fail");
-            this._purchaseMessage.text = "Purchase of " + seedID + " failure.";
+            this._purchaseMessage.text = "Purchase failure, not enough money.";
         }
         
     }
