@@ -7,6 +7,7 @@ public class AdminPanelManager : MonoBehaviour
     public GameObject rarityPanel;
     public GameObject plotPanel;
     public GameObject itemPanel;
+    public GameObject upgradePanel;
 
     [Header("Hotkeys")]
     public KeyCode cropPanelKey = KeyCode.F1;
@@ -14,6 +15,7 @@ public class AdminPanelManager : MonoBehaviour
     public KeyCode rarityPanelKey = KeyCode.F3;
     public KeyCode plotPanelKey = KeyCode.F4;
     public KeyCode itemPanelKey = KeyCode.F5;
+    public KeyCode upgradePanelKey = KeyCode.F6;
     public KeyCode closeAllPanelsKey = KeyCode.Escape;
 
     [Header("Settings")]
@@ -45,6 +47,10 @@ public class AdminPanelManager : MonoBehaviour
         if (Input.GetKeyDown(itemPanelKey))
         {
             TogglePanel(itemPanel);
+        }
+        if (Input.GetKeyDown(upgradePanelKey))
+        {
+            TogglePanel(upgradePanel);
         }
         if (Input.GetKeyDown(closeAllPanelsKey))
         {
