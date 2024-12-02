@@ -142,6 +142,30 @@ public class DataRetriever : MonoBehaviour
         }
     }
 
+    public async Task<int> RetrieveCropPurchasingPrice(int marketID)
+    {
+        try
+        {
+            using (SqlConnection connection = new SqlConnection(dbManager.ConnectionString))
+            {
+                await connection.OpenAsync();
+                string query = "SELECT PurchasingPrice FROM Market WHERE MarketID = @MarketID";
+
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@MarketID", marketID);
+                    var result = await command.ExecuteScalarAsync();
+                    return result != null ? Convert.ToInt32(result) : 0;
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Error retrieving selling price: {e.Message}");
+            return 0;
+        }
+    }
+
     public async Task<List<Rarity>> RetrieveRarities()
     {
         List<Rarity> rarities = new List<Rarity>();

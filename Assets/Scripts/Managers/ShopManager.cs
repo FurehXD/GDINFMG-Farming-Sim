@@ -6,8 +6,6 @@ using UnityEngine.UI;
 public class ShopManager : MonoBehaviour {
     [Header("Singleton Manager")]
     public static ShopManager Instance;
-    [SerializeField]
-    private Money _money;
     [SerializeField]    public List<Button> _cropButtons;
     [SerializeField]    public List<Button> _fertilizerButtons;
     [SerializeField]    public List<Button> _upgradeButtons;
@@ -41,26 +39,27 @@ public class ShopManager : MonoBehaviour {
     }
 
     public bool CheckPurchase(int cost) {
-        if(_money.CurrentMoney >= cost) {
-            _money.Buy(cost);
+        if(Money.Instance.CurrentMoney >= cost) {
+            Money.Instance.Buy(cost);
         }
         else{}
         return false;
     }
 
-    public void BuySeed(int seedID) {
+    public async void BuySeed(int seedID) {
         //get item form database using id
         //add crop to inventory
-        //if(this.CheckPurchase(cost)) {
-            //randomize quality
-            //add to inventory
-            //change text to say purchase bought
-        //}
-        //else {
-            //change text to say fail
-        //}
-        Debug.Log("Success");
-        this._purchaseMessage.text = "Purchase successful.";
+        int cropPrice = await DataRetriever.Instance.RetrieveCropPurchasingPrice(seedID);
+        if(this.CheckPurchase(cropPrice)) {
+            InventoryManager.Instance.StoreBoughtItem(seedID, this.RandomizeQuality());
+            Debug.Log("Success");
+            this._purchaseMessage.text = "Purchase of " + seedID + " successful.";
+        }
+        else {
+            Debug.Log("Fail");
+            this._purchaseMessage.text = "Purchase of " + seedID + " failure.";
+        }
+        
     }
 
     public void BuyItem(string itemID) {
@@ -77,24 +76,24 @@ public class ShopManager : MonoBehaviour {
         this._purchaseMessage.text = "Purchase successful.";
     }
 
-    public int RandomizeQuality() {
+    public QualityData RandomizeQuality() {
         int numHold = Random.Range(1, 100);
-        int qualityID = 3;
-        if (numHold > 0 && numHold < 10) {
-            qualityID = 1;
+        QualityData quality = new QualityData(0, "", 0);
+        if (numHold > 0 && numHold < 5) {
+            quality = new QualityData(1, "Poor", 0.4f);
         }
-        else if (numHold > 11 && numHold < 35) {
-            qualityID = 2;
+        else if (numHold > 6 && numHold < 25) {
+            quality = new QualityData(2, "Normal", 0.8f);
         }
-        else if (numHold > 36 && numHold < 65) {
-            qualityID = 3;
+        else if (numHold > 26 && numHold < 75) {
+            quality = new QualityData(3, "Good", 1.0f);
         }
-        else if (numHold > 66 && numHold < 90) {
-            qualityID = 4;
+        else if (numHold > 76 && numHold < 95) {
+            quality = new QualityData(4, "Excellent", 1.2f);
         }
-        else if (numHold > 91 && numHold < 100) {
-            qualityID = 5;
+        else if (numHold > 96 && numHold < 100) {
+            quality = new QualityData(5, "Amazing", 1.5f);
         }
-        return qualityID;
+        return quality;
     }
 }
