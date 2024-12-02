@@ -196,5 +196,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: adce5ee449b43e34da4d1346a52ad050, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lifespan: 20
+  lifespan: 10
   countdownPrecision: 0.1
