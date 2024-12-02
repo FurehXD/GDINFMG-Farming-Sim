@@ -7,42 +7,79 @@ using System.Data.SqlClient;
 public class PlotAdminPanel : BaseAdminPanel
 {
     private string plotName = "";
-    private float plotGrowthBuff = 0f;
+    private float plotGrowthBuff = 1.0f;
     private int gridSizeX = 1;
     private int gridSizeY = 1;
+    private int assetId = 0;
     private Texture2D gridPreviewTexture;
+
+    protected override void Awake()
+    {
+        base.Awake();
+        if (backgroundStyle == null)
+        {
+            InitializeStyles();
+        }
+    }
+
+    protected override void OnEnable()
+    {
+        base.OnEnable();
+        ProcessAsyncOperation(RefreshData());
+    }
 
     private void OnGUI()
     {
-        if (!gameObject.activeSelf) return;
+        if (!gameObject.activeSelf || GUI.skin == null) return;
+
+        if (backgroundStyle == null)
+        {
+            InitializeStyles();
+            return;
+        }
 
         // Draw the background
-        GUI.Box(new Rect(0, 0, Screen.width, Screen.height), GUIContent.none, GUI.skin.box);
+        GUI.Box(new Rect(0, 0, Screen.width, Screen.height), GUIContent.none, backgroundStyle);
 
         // Begin the main area
         GUILayout.BeginArea(new Rect(10, 10, Screen.width - 20, Screen.height - 20));
 
-        // Begin the scroll view
         scrollPosition = GUILayout.BeginScrollView(scrollPosition);
 
-        // Header
-        GUILayout.Box("Plot Management Panel", GUILayout.ExpandWidth(true));
+        try
+        {
+            DisplayHeader();
+            DisplayCurrentData();
+            DisplayAddNewPlot();
+        }
+        finally
+        {
+            GUILayout.EndScrollView();
+            GUILayout.EndArea();
+        }
+    }
 
-        // Status message if any
+    private void DisplayHeader()
+    {
+        GUILayout.Box("Plot Management Panel", backgroundStyle, GUILayout.ExpandWidth(true));
+
         if (!string.IsNullOrEmpty(operationStatus))
         {
-            GUILayout.Box(operationStatus, GUILayout.ExpandWidth(true));
+            GUILayout.Box(operationStatus, backgroundStyle, GUILayout.ExpandWidth(true));
         }
+    }
 
-        // Display current data
-        GUILayout.Box("Current Plots", GUILayout.ExpandWidth(true));
+    private void DisplayCurrentData()
+    {
+        GUILayout.Box("Current Plots", backgroundStyle, GUILayout.ExpandWidth(true));
+
         if (currentData != null && currentData.Rows.Count > 0)
         {
             // Headers
             GUILayout.BeginHorizontal();
             foreach (DataColumn column in currentData.Columns)
             {
-                GUILayout.Box(column.ColumnName, GUILayout.Width(120));
+                GUILayout.Box(column.ColumnName, backgroundStyle, GUILayout.Width(120));
             }
             GUILayout.EndHorizontal();
 
@@ -52,52 +89,44 @@ public class PlotAdminPanel : BaseAdminPanel
                 GUILayout.BeginHorizontal();
                 foreach (var item in row.ItemArray)
                 {
-                    GUILayout.Box(item.ToString(), GUILayout.Width(120));
+                    GUILayout.Box(item.ToString(), backgroundStyle, GUILayout.Width(120));
                 }
                 GUILayout.EndHorizontal();
             }
         }
         else
         {
-            GUILayout.Label("No data available");
+            GUILayout.Label("No data available", labelStyle);
         }
+    }
 
-        // Add new plot section
+    private void DisplayAddNewPlot()
+    {
         GUILayout.Space(20);
-        GUILayout.Box("Add New Plot", GUILayout.ExpandWidth(true));
+        GUILayout.Box("Add New Plot", backgroundStyle, GUILayout.ExpandWidth(true));
 
-        GUILayout.BeginVertical(GUI.skin.box);
-
-        GUILayout.Label("Plot Name:");
-        plotName = GUILayout.TextField(plotName, GUILayout.Width(200));
-
-        GUILayout.Label("Universal Growth Buff %:");
-        string buffStr = GUILayout.TextField(plotGrowthBuff.ToString(), GUILayout.Width(100));
-        float.TryParse(buffStr, out plotGrowthBuff);
-
-        GUILayout.Label("Grid Size X:");
-        string xSizeStr = GUILayout.TextField(gridSizeX.ToString(), GUILayout.Width(100));
-        int.TryParse(xSizeStr, out gridSizeX);
-
-        GUILayout.Label("Grid Size Y:");
-        string ySizeStr = GUILayout.TextField(gridSizeY.ToString(), GUILayout.Width(100));
-        int.TryParse(ySizeStr, out gridSizeY);
-
-        // Grid preview
-        GUILayout.Label("Grid Size Preview:");
-        DrawGridPreview();
-
-        GUI.enabled = !isOperationInProgress;
-        if (GUILayout.Button("Add Plot", GUILayout.Width(100)))
+        GUILayout.BeginVertical(backgroundStyle);
+        try
         {
-            ProcessAsyncOperation(InsertPlot());
+            plotName = DrawInputField("Plot Name:", plotName);
+            plotGrowthBuff = DrawFloatField("Growth Buff:", plotGrowthBuff);
+            gridSizeX = DrawIntField("Grid Size X:", gridSizeX);
+            gridSizeY = DrawIntField("Grid Size Y:", gridSizeY);
+            assetId = DrawIntField("Asset ID:", assetId);
+
+            DrawGridPreview();
+
+            GUI.enabled = !isOperationInProgress;
+            if (GUILayout.Button("Add Plot", buttonStyle, GUILayout.Width(100)))
+            {
+                ProcessAsyncOperation(InsertPlot());
+            }
+            GUI.enabled = true;
         }
-        GUI.enabled = true;
-
-        GUILayout.EndVertical();
-
-        GUILayout.EndScrollView();
-        GUILayout.EndArea();
+        finally
+        {
+            GUILayout.EndVertical();
+        }
     }
 
     private void DrawGridPreview()
@@ -106,7 +135,6 @@ public class PlotAdminPanel : BaseAdminPanel
         float previewWidth = gridSizeX * cellSize;
         float previewHeight = gridSizeY * cellSize;
 
-        // Limit preview size to reasonable dimensions
         float maxSize = 400f;
         if (previewWidth > maxSize || previewHeight > maxSize)
         {
@@ -116,13 +144,18 @@ public class PlotAdminPanel : BaseAdminPanel
             cellSize *= scale;
         }
 
-        // Create preview texture
-        if (gridPreviewTexture != null)
+        if (gridPreviewTexture == null ||
+            gridPreviewTexture.width != (int)previewWidth ||
+            gridPreviewTexture.height != (int)previewHeight)
         {
-            Destroy(gridPreviewTexture);
+            if (gridPreviewTexture != null)
+            {
+                Destroy(gridPreviewTexture);
+            }
+            gridPreviewTexture = new Texture2D((int)previewWidth, (int)previewHeight);
         }
 
-        gridPreviewTexture = new Texture2D((int)previewWidth, (int)previewHeight);
+        // Draw grid
         Color gridColor = new Color(0.3f, 0.3f, 0.3f);
         Color lineColor = new Color(0.7f, 0.7f, 0.7f);
 
@@ -135,7 +168,7 @@ public class PlotAdminPanel : BaseAdminPanel
             }
         }
 
-        // Draw grid lines
+        // Draw lines
         for (int x = 0; x <= gridSizeX; x++)
         {
             int xPos = (int)(x * cellSize);
@@ -162,11 +195,9 @@ public class PlotAdminPanel : BaseAdminPanel
 
         gridPreviewTexture.Apply();
 
-        // Draw the preview with a border
-        GUILayout.BeginVertical(GUI.skin.box);
+        GUILayout.Label("Grid Preview:", labelStyle);
         GUILayout.Box(gridPreviewTexture, GUILayout.Width(previewWidth), GUILayout.Height(previewHeight));
         GUILayout.Label($"Grid Size: {gridSizeX} x {gridSizeY}", labelStyle);
-        GUILayout.EndVertical();
     }
 
     protected override async Task RefreshData()
@@ -178,13 +209,14 @@ public class PlotAdminPanel : BaseAdminPanel
                 await connection.OpenAsync();
                 string query = @"
                     SELECT 
+                        PlotID as 'ID',
                         PlotName as 'Name',
-                        UniversalGrowthBuffPercentage as 'Growth Buff %',
+                        UniversalGrowthBuffPercentage as 'Growth Buff',
                         GridSizeX as 'Width',
                         GridSizeY as 'Height',
-                        CONCAT(GridSizeX, ' x ', GridSizeY) as 'Grid Size'
-                    FROM Plot
-                    ORDER BY PlotName";
+                        AssetID as 'Asset ID'
+                    FROM Plots
+                    ORDER BY PlotID";
 
                 using (var command = new SqlCommand(query, connection))
                 {
@@ -205,7 +237,6 @@ public class PlotAdminPanel : BaseAdminPanel
     {
         try
         {
-            // Validate input
             if (string.IsNullOrEmpty(plotName))
             {
                 throw new Exception("Plot name cannot be empty");
@@ -219,19 +250,35 @@ public class PlotAdminPanel : BaseAdminPanel
             using (var connection = new SqlConnection(DatabaseManager.Instance.ConnectionString))
             {
                 await connection.OpenAsync();
-                string query = "INSERT INTO Plot (PlotName, UniversalGrowthBuffPercentage, GridSizeX, GridSizeY) " +
-                             "VALUES (@Name, @Buff, @SizeX, @SizeY)";
+
+                // Get next PlotID
+                string getMaxPlotIDQuery = "SELECT ISNULL(MAX(PlotID), 0) FROM Plots;";
+                int nextPlotID;
+                using (var command = new SqlCommand(getMaxPlotIDQuery, connection))
+                {
+                    nextPlotID = Convert.ToInt32(await command.ExecuteScalarAsync()) + 1;
+                }
+
+                string query = @"
+                    INSERT INTO Plots 
+                    (PlotID, PlotName, UniversalGrowthBuffPercentage, GridSizeX, GridSizeY, AssetID) 
+                    VALUES 
+                    (@PlotID, @Name, @Buff, @SizeX, @SizeY, @AssetID)";
 
                 using (var command = new SqlCommand(query, connection))
                 {
+                    command.Parameters.AddWithValue("@PlotID", nextPlotID);
                     command.Parameters.AddWithValue("@Name", plotName);
                     command.Parameters.AddWithValue("@Buff", plotGrowthBuff);
                     command.Parameters.AddWithValue("@SizeX", gridSizeX);
                     command.Parameters.AddWithValue("@SizeY", gridSizeY);
+                    command.Parameters.AddWithValue("@AssetID", assetId);
                     await command.ExecuteNonQueryAsync();
                 }
+
+                ClearInputs();
+                await RefreshData();
             }
-            ClearInputs();
         }
         catch (Exception e)
         {
@@ -243,9 +290,10 @@ public class PlotAdminPanel : BaseAdminPanel
     private void ClearInputs()
     {
         plotName = "";
-        plotGrowthBuff = 0f;
+        plotGrowthBuff = 1.0f;
         gridSizeX = 1;
         gridSizeY = 1;
+        assetId = 0;
     }
 
     private void OnDestroy()
