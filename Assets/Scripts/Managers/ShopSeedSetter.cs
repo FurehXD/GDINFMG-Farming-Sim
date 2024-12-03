@@ -13,7 +13,7 @@ public class ShopSeedSetter : MonoBehaviour
     private List<CropButton> seedReferences = new();
 
     private TMP_Dropdown areaSelectorDropdown;
-    private int maxSeedID = 12;//the last num for seeds in the market table
+    private int maxSeedID = 16;//the last num for seeds in the market table
 
     private void Start()
     {
