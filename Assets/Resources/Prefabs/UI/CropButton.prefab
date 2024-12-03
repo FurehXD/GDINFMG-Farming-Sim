@@ -127,6 +127,7 @@ MonoBehaviour:
   buttonType: 1
   markerAsset: {fileID: 0}
   bubbleText: CropButton
+  bubbleTemplate: {fileID: 6600592419611133744, guid: d934d672130060c4ca59d9fa023d67e4, type: 3}
   bubbleRelativeScaleFactor: 0.5
   positionRelativeToMouse: 5
   hasUniqueAlpha: 1
@@ -140,6 +141,9 @@ MonoBehaviour:
   hasUniqueSFX: 0
   hoverSFX: {fileID: 0}
   clickSFX: {fileID: 0}
+  cropName: 
+  cropID: 1
+  _cropIcon: {fileID: 7935481601390955554}
 --- !u!114 &6326193894310166888
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -166,7 +170,7 @@ GameObject:
   - component: {fileID: 6304464539345671307}
   - component: {fileID: 7935481601390955554}
   m_Layer: 5
-  m_Name: Crop
+  m_Name: CropIcon
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -219,7 +223,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 7660b40d1800e9d4cbc840c07030de47, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 54114bd163bdf254fb4309d53e108c20, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
