@@ -41,10 +41,12 @@ public class UpgradeButtons : MonoBehaviour {
             OnLuckyCharmBought?.Invoke(this.rarityBuffFactor);
             this.shopMessage.text = "Rarity Boosted!";
             this._upgradeButtons[0].interactable = false;
+            Logger.Instance.LogMessage("Purchase of " + await DataRetriever.Instance.RetrieveCropName(18) + "seed successful.");
         }
         else {
             this.shopMessage.text = "Not enough money.";
             Debug.LogWarning("Not enough money.");
+            Logger.Instance.LogMessage("Purchase failed");
         }    
     }
 
@@ -55,10 +57,12 @@ public class UpgradeButtons : MonoBehaviour {
             OnGrowthTimeUpgrade?.Invoke(0.2f);
             this.shopMessage.text = "Fertilizer Boosted!";
             this._upgradeButtons[1].interactable = false;
+            Logger.Instance.LogMessage("Purchase of " + await DataRetriever.Instance.RetrieveCropName(19) + "seed successful.");
         }
         else {
             this.shopMessage.text = "Not enough money.";
             Debug.LogWarning("Not enough money.");
+            Logger.Instance.LogMessage("Purchase failed");
         }
     }
 
@@ -69,10 +73,12 @@ public class UpgradeButtons : MonoBehaviour {
             OnGrowthTimeUpgrade?.Invoke(0.4f);
             this.shopMessage.text = "Fertilizer Boosted!";
             this._upgradeButtons[2].interactable = false;
+            Logger.Instance.LogMessage("Purchase of " + await DataRetriever.Instance.RetrieveCropName(20) + "seed successful.");
         }
         else {
             this.shopMessage.text = "Not enough money.";
             Debug.LogWarning("Not enough money.");
+            Logger.Instance.LogMessage("Purchase failed");
         }
     }
 
@@ -82,10 +88,12 @@ public class UpgradeButtons : MonoBehaviour {
             UpgradeManager.Instance.MarketConnection();
             this.shopMessage.text = "Sell Value Boosted!";
             this._upgradeButtons[3].interactable = false;
+            Logger.Instance.LogMessage("Purchase of " + await DataRetriever.Instance.RetrieveCropName(21) + "seed successful.");
         }
         else {
             this.shopMessage.text = "Not enough money.";
             Debug.LogWarning("Not enough money.");
+            Logger.Instance.LogMessage("Purchase failed");
         }
     }
 
@@ -95,10 +103,12 @@ public class UpgradeButtons : MonoBehaviour {
             UpgradeManager.Instance.Advertisement();
             this.shopMessage.text = "Sell Value Boosted!";
             this._upgradeButtons[4].interactable = false;
+            Logger.Instance.LogMessage("Purchase of " + await DataRetriever.Instance.RetrieveCropName(22) + "seed successful.");
         }
         else {
             this.shopMessage.text = "Not enough money.";
             Debug.LogWarning("Not enough money.");
+            Logger.Instance.LogMessage("Purchase failed");
         }
     }
 
@@ -108,10 +118,12 @@ public class UpgradeButtons : MonoBehaviour {
             UpgradeManager.Instance.ChemicalInjection();
             this.shopMessage.text = "Yield Doubled!";
             this._upgradeButtons[5].interactable = false;
+            Logger.Instance.LogMessage("Purchase of " + await DataRetriever.Instance.RetrieveCropName(23) + "seed successful.");
         }
         else {
             this.shopMessage.text = "Not enough money.";
             Debug.LogWarning("Not enough money.");
+            Logger.Instance.LogMessage("Purchase failed");
         }
     }
 }
