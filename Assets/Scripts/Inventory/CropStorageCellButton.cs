@@ -128,5 +128,13 @@ public class CropStorageCellButton : BaseButton
 
         this.cropIDItStores = cropIDItStores;
         this.cropItStores.CropID = cropIDItStores;
+
+        //if (this.childButtonReferences.Count > 0)
+        //{
+        //    foreach(var childButton in this.childButtonReferences)
+        //    {
+        //        childButton.SetCropIDItStores(cropIDItStores);
+        //    }
+        //}
     }
 }

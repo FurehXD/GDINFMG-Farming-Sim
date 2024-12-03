@@ -213,7 +213,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c304e22eefb5f97409b9b4fa72c4d0fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  baseGrowthRate: 4
+  baseGrowthRate: 20
   OnReadyForHarvest:
     m_PersistentCalls:
       m_Calls:
@@ -313,6 +313,7 @@ MonoBehaviour:
   buttonType: 1
   markerAsset: {fileID: 0}
   bubbleText: 'Plot [Base]'
+  bubbleTemplate: {fileID: 0}
   bubbleRelativeScaleFactor: 0.5
   positionRelativeToMouse: 5
   hasUniqueAlpha: 1
@@ -813,6 +814,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c93ca926ba0562245ad45cf07cd1cad0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  seasonRarityMultiplier: 2
 --- !u!114 &2494518447379864204
 MonoBehaviour:
   m_ObjectHideFlags: 0

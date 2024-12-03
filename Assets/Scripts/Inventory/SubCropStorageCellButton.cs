@@ -20,8 +20,11 @@ public class SubCropStorageCellButton : BaseButton
 
     public void Initialize(QualityData quality, Crop storingCrop, CropStorageCellButton parentCreator)
     {
-        this.quality = quality; 
-        this.cropItStores = storingCrop;
+        if (!this.cropItStores)
+            cropItStores = this.GetComponentInChildren<Crop>();
+
+        this.quality = quality;
+        this.cropItStores.CropID = storingCrop.CropID;
         this.parentCreator = parentCreator;
 
         this.GetComponentInChildren<IconApplier>().ApplyIcon(this.cropItStores.CropIcon);
@@ -44,6 +47,7 @@ public class SubCropStorageCellButton : BaseButton
             Debug.LogError(this.name + "  was not initialized!");
 
         this.quantityTMPDisplay = this.GetComponentInChildren<TextMeshProUGUI>();
+        this.cropItStores = this.GetComponentInChildren<Crop>();
     }
     protected override void Update()
     {

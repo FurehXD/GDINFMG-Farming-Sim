@@ -3,152 +3,287 @@ using System;
 using System.Data;
 using System.Threading.Tasks;
 using System.Data.SqlClient;
+using System.Collections.Generic;
+using System.Linq;
 
 public class CropAdminPanel : BaseAdminPanel
 {
     private string cropName = "";
     private float growthRate = 1.0f;
-    private string fertilizerName = "";
-    private float fertilizerBuff = 0f;
-    private int fertilizerItemId = 0;
-    private string seasonName = "";
+    private int seasonDuration = 30;
     private string fertileCrops = "";
     private string infertileCrops = "";
-    private int seasonDuration = 30;
-    private decimal purchasePrice = 0m;
-    private decimal sellingPrice = 0m;
-    private int marketItemId = 0;
+    private int seasonColorR = 255;
+    private int seasonColorG = 255;
+    private int seasonColorB = 255;
+
+    private List<(int id, string name)> existingFertilizers = new List<(int id, string name)>();
+    private List<(int id, decimal sellPrice)> existingMarkets = new List<(int id, decimal sellPrice)>();
+    private int selectedFertilizerId = 1;
+    private int selectedMarketId = 1;
+
+    private List<(int id, string name)> existingSeasons = new List<(int id, string name)>();
+    private int selectedSeasonId = 1;
+
+    protected override void Awake()
+    {
+        base.Awake();
+        if (backgroundStyle == null)
+        {
+            InitializeStyles();
+        }
+    }
+
+    protected override void OnEnable()
+    {
+        base.OnEnable();
+        ProcessAsyncOperation(LoadExistingData());
+    }
+
+    private async Task LoadExistingData()
+    {
+        try
+        {
+            using (var connection = new SqlConnection(DatabaseManager.Instance.ConnectionString))
+            {
+                await connection.OpenAsync();
+
+                // Load Seasons
+                string seasonQuery = "SELECT SeasonID, SeasonName FROM Season";
+                using (var command = new SqlCommand(seasonQuery, connection))
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    existingSeasons.Clear();
+                    while (await reader.ReadAsync())
+                    {
+                        existingSeasons.Add((
+                            reader.GetInt32(0),
+                            reader.GetString(1)
+                        ));
+                    }
+                }
+                // Load Fertilizers
+                string fertilizerQuery = "SELECT FertilizerID, FertilizerName FROM Fertilizer";
+                using (var command = new SqlCommand(fertilizerQuery, connection))
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    existingFertilizers.Clear();
+                    while (await reader.ReadAsync())
+                    {
+                        existingFertilizers.Add((
+                            reader.GetInt32(0),
+                            reader.GetString(1)
+                        ));
+                    }
+                }
+
+                // Load Markets
+                string marketQuery = "SELECT MarketID, SellingPrice FROM Market";
+                using (var command = new SqlCommand(marketQuery, connection))
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    existingMarkets.Clear();
+                    while (await reader.ReadAsync())
+                    {
+                        existingMarkets.Add((
+                            reader.GetInt32(0),
+                            reader.GetDecimal(1)
+                        ));
+                    }
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Error loading existing data: {e.Message}");
+            operationStatus = $"Error loading data: {e.Message}";
+        }
+    }
 
     private void OnGUI()
     {
-        if (!gameObject.activeSelf) return;
+        if (!gameObject.activeSelf || GUI.skin == null) return;
 
-        // Draw the background
-        GUI.Box(new Rect(0, 0, Screen.width, Screen.height), GUIContent.none, GUI.skin.box);
-
-        // Begin the main area
-        GUILayout.BeginArea(new Rect(10, 10, Screen.width - 20, Screen.height - 20));
-
-        // Begin the scroll view
-        scrollPosition = GUILayout.BeginScrollView(scrollPosition);
-
-        // Header
-        GUILayout.Box("Crop Management Panel", GUILayout.ExpandWidth(true));
-
-        // Status message if any
-        if (!string.IsNullOrEmpty(operationStatus))
+        if (backgroundStyle == null)
         {
-            GUILayout.Box(operationStatus, GUILayout.ExpandWidth(true));
+            InitializeStyles();
+            return;
         }
 
-        // Display current data
-        GUILayout.Box("Current Crops", GUILayout.ExpandWidth(true));
+        GUI.Box(new Rect(0, 0, Screen.width, Screen.height), "", backgroundStyle);
+
+        GUILayout.BeginArea(new Rect(10, 10, Screen.width - 20, Screen.height - 20));
+
+        scrollPosition = GUILayout.BeginScrollView(scrollPosition);
+
+        try
+        {
+            DisplayHeader();
+            DisplayCurrentData();
+            DisplayAddNewCropSection();
+        }
+        finally
+        {
+            GUILayout.EndScrollView();
+            GUILayout.EndArea();
+        }
+    }
+
+    private void DisplayHeader()
+    {
+        GUILayout.Box("Crop Management Panel", backgroundStyle, GUILayout.ExpandWidth(true));
+
+        if (!string.IsNullOrEmpty(operationStatus))
+        {
+            GUILayout.Box(operationStatus, backgroundStyle, GUILayout.ExpandWidth(true));
+        }
+    }
+
+    private void DisplayCurrentData()
+    {
+        GUILayout.Box("Current Crops", backgroundStyle, GUILayout.ExpandWidth(true));
+
         if (currentData != null && currentData.Rows.Count > 0)
         {
-            // Headers
-            GUILayout.BeginHorizontal();
+            // Display Headers
+            GUILayout.BeginHorizontal(backgroundStyle);
             foreach (DataColumn column in currentData.Columns)
             {
-                GUILayout.Box(column.ColumnName, GUILayout.Width(120));
+                GUILayout.Label(column.ColumnName, labelStyle, GUILayout.Width(120));
             }
             GUILayout.EndHorizontal();
 
-            // Data rows
+            // Display Data
             foreach (DataRow row in currentData.Rows)
             {
-                GUILayout.BeginHorizontal();
+                GUILayout.BeginHorizontal(backgroundStyle);
                 foreach (var item in row.ItemArray)
                 {
-                    GUILayout.Box(item.ToString(), GUILayout.Width(120));
+                    GUILayout.Label(item.ToString(), labelStyle, GUILayout.Width(120));
                 }
                 GUILayout.EndHorizontal();
             }
         }
         else
         {
-            GUILayout.Label("No data available");
+            GUILayout.Label("No data available", labelStyle);
         }
+    }
 
-        // Add new crop section
-        GUILayout.Space(20);
-        GUILayout.Box("Add New Crop", GUILayout.ExpandWidth(true));
+    private void DisplayAddNewCropSection()
+    {
+        GUILayout.Box("Add New Crop", backgroundStyle, GUILayout.ExpandWidth(true));
 
-        // Input fields
-        GUILayout.BeginVertical(GUI.skin.box);
+        GUILayout.BeginVertical(backgroundStyle);
 
-        // Basic crop details
-        GUILayout.Label("Crop Name:");
-        cropName = GUILayout.TextField(cropName, GUILayout.Width(200));
-
-        GUILayout.Label("Growth Rate:");
-        string growthRateStr = GUILayout.TextField(growthRate.ToString(), GUILayout.Width(100));
-        float.TryParse(growthRateStr, out growthRate);
-
-        // Fertilizer section
-        GUILayout.Box("Fertilizer Details", GUILayout.ExpandWidth(true));
-        GUILayout.BeginVertical(GUI.skin.box);
-
-        GUILayout.Label("Fertilizer Name:");
-        fertilizerName = GUILayout.TextField(fertilizerName, GUILayout.Width(200));
-
-        GUILayout.Label("Growth Buff %:");
-        string buffStr = GUILayout.TextField(fertilizerBuff.ToString(), GUILayout.Width(100));
-        float.TryParse(buffStr, out fertilizerBuff);
-
-        GUILayout.Label("Item ID:");
-        string itemIdStr = GUILayout.TextField(fertilizerItemId.ToString(), GUILayout.Width(100));
-        int.TryParse(itemIdStr, out fertilizerItemId);
-
-        GUILayout.EndVertical();
-
-        // Season section
-        GUILayout.Box("Season Details", GUILayout.ExpandWidth(true));
-        GUILayout.BeginVertical(GUI.skin.box);
-
-        GUILayout.Label("Season Name:");
-        seasonName = GUILayout.TextField(seasonName, GUILayout.Width(200));
-
-        GUILayout.Label("Fertile Crops (comma-separated):");
-        fertileCrops = GUILayout.TextField(fertileCrops, GUILayout.Width(300));
-
-        GUILayout.Label("Infertile Crops (comma-separated):");
-        infertileCrops = GUILayout.TextField(infertileCrops, GUILayout.Width(300));
-
-        GUILayout.Label("Duration (days):");
-        string durationStr = GUILayout.TextField(seasonDuration.ToString(), GUILayout.Width(100));
-        int.TryParse(durationStr, out seasonDuration);
-
-        GUILayout.EndVertical();
-
-        // Market section
-        GUILayout.Box("Market Details", GUILayout.ExpandWidth(true));
-        GUILayout.BeginVertical(GUI.skin.box);
-
-        GUILayout.Label("Purchase Price:");
-        string purchaseStr = GUILayout.TextField(purchasePrice.ToString(), GUILayout.Width(100));
-        decimal.TryParse(purchaseStr, out purchasePrice);
-
-        GUILayout.Label("Selling Price:");
-        string sellingStr = GUILayout.TextField(sellingPrice.ToString(), GUILayout.Width(100));
-        decimal.TryParse(sellingStr, out sellingPrice);
-
-        GUILayout.Label("Market Item ID:");
-        string marketIdStr = GUILayout.TextField(marketItemId.ToString(), GUILayout.Width(100));
-        int.TryParse(marketIdStr, out marketItemId);
-
-        GUILayout.EndVertical();
-
-        GUI.enabled = !isOperationInProgress;
-        if (GUILayout.Button("Add Crop", GUILayout.Width(100)))
+        try
         {
-            ProcessAsyncOperation(InsertCrop());
+            cropName = DrawInputField("Crop Name:", cropName);
+            growthRate = DrawFloatField("Growth Rate:", growthRate);
+
+            DisplayFertilizerSection();
+            DisplaySeasonSection();
+            DisplayMarketSection();
+
+            GUI.enabled = !isOperationInProgress;
+            if (GUILayout.Button("Add Crop", buttonStyle))
+            {
+                ProcessAsyncOperation(InsertCrop());
+            }
+            GUI.enabled = true;
         }
-        GUI.enabled = true;
+        finally
+        {
+            GUILayout.EndVertical();
+        }
+    }
 
-        GUILayout.EndVertical();
+    private void DisplayFertilizerSection()
+    {
+        GUILayout.Box("Fertilizer Selection", backgroundStyle);
 
-        GUILayout.EndScrollView();
-        GUILayout.EndArea();
+        GUILayout.BeginVertical(backgroundStyle);
+        try
+        {
+            GUILayout.Label("Select Fertilizer:", labelStyle);
+            if (existingFertilizers.Count > 0)
+            {
+                int index = existingFertilizers.FindIndex(f => f.id == selectedFertilizerId);
+                string[] options = existingFertilizers.Select(f => f.name).ToArray();
+                index = GUILayout.SelectionGrid(index, options, 1, buttonStyle);
+                if (index >= 0 && index < existingFertilizers.Count)
+                {
+                    selectedFertilizerId = existingFertilizers[index].id;
+                }
+            }
+            else
+            {
+                GUILayout.Label("No fertilizers available", labelStyle);
+            }
+        }
+        finally
+        {
+            GUILayout.EndVertical();
+        }
+    }
+
+    private void DisplaySeasonSection()
+    {
+        GUILayout.Box("Season Selection", backgroundStyle);
+
+        GUILayout.BeginVertical(backgroundStyle);
+        try
+        {
+            GUILayout.Label($"Selected Season ID: {selectedSeasonId}", labelStyle); // Debug line
+            GUILayout.Label("Select Season:", labelStyle);
+            if (existingSeasons.Count > 0)
+            {
+                int index = existingSeasons.FindIndex(s => s.id == selectedSeasonId);
+                string[] options = existingSeasons.Select(s => $"ID: {s.id} - {s.name}").ToArray();
+                index = GUILayout.SelectionGrid(index, options, 1, buttonStyle);
+                if (index >= 0 && index < existingSeasons.Count)
+                {
+                    selectedSeasonId = existingSeasons[index].id;
+                }
+            }
+            else
+            {
+                GUILayout.Label("No seasons available", labelStyle);
+            }
+        }
+        finally
+        {
+            GUILayout.EndVertical();
+        }
+    }
+
+    private void DisplayMarketSection()
+    {
+        GUILayout.Box("Market Selection", backgroundStyle);
+
+        GUILayout.BeginVertical(backgroundStyle);
+        try
+        {
+            GUILayout.Label("Select Market:", labelStyle);
+            if (existingMarkets.Count > 0)
+            {
+                int index = existingMarkets.FindIndex(m => m.id == selectedMarketId);
+                string[] options = existingMarkets.Select(m => $"${m.sellPrice}").ToArray();
+                index = GUILayout.SelectionGrid(index, options, 1, buttonStyle);
+                if (index >= 0 && index < existingMarkets.Count)
+                {
+                    selectedMarketId = existingMarkets[index].id;
+                }
+            }
+            else
+            {
+                GUILayout.Label("No markets available", labelStyle);
+            }
+        }
+        finally
+        {
+            GUILayout.EndVertical();
+        }
     }
 
     protected override async Task RefreshData()
@@ -188,6 +323,7 @@ public class CropAdminPanel : BaseAdminPanel
         catch (Exception e)
         {
             Debug.LogError($"Error refreshing crop data: {e.Message}");
+            operationStatus = $"Error refreshing data: {e.Message}";
             throw;
         }
     }
@@ -200,59 +336,56 @@ public class CropAdminPanel : BaseAdminPanel
             {
                 await connection.OpenAsync();
 
-                // First, insert Growth data
-                string growthQuery = "INSERT INTO Growth (GrowthRate) VALUES (@GrowthRate); SELECT SCOPE_IDENTITY();";
-                int growthId;
-                using (var command = new SqlCommand(growthQuery, connection))
+                using (var transaction = connection.BeginTransaction())
                 {
-                    command.Parameters.AddWithValue("@GrowthRate", growthRate);
-                    growthId = Convert.ToInt32(await command.ExecuteScalarAsync());
-                }
+                    try
+                    {
+                        // Get next GrowthID and insert Growth data
+                        string getMaxGrowthIDQuery = "SELECT ISNULL(MAX(GrowthID), 0) FROM Growth;";
+                        int nextGrowthID;
+                        using (var command = new SqlCommand(getMaxGrowthIDQuery, connection, transaction))
+                        {
+                            nextGrowthID = Convert.ToInt32(await command.ExecuteScalarAsync()) + 1;
+                        }
 
-                // Insert Fertilizer data
-                string fertilizerQuery = "INSERT INTO Fertilizer (FertilizerName, GrowthRateBuffPercentage, ItemID) VALUES (@Name, @Buff, @ItemID); SELECT SCOPE_IDENTITY();";
-                int fertilizerId;
-                using (var command = new SqlCommand(fertilizerQuery, connection))
-                {
-                    command.Parameters.AddWithValue("@Name", fertilizerName);
-                    command.Parameters.AddWithValue("@Buff", fertilizerBuff);
-                    command.Parameters.AddWithValue("@ItemID", fertilizerItemId);
-                    fertilizerId = Convert.ToInt32(await command.ExecuteScalarAsync());
-                }
+                        string growthQuery = "INSERT INTO Growth (GrowthID, GrowthRate) VALUES (@GrowthID, @GrowthRate);";
+                        using (var command = new SqlCommand(growthQuery, connection, transaction))
+                        {
+                            command.Parameters.AddWithValue("@GrowthID", nextGrowthID);
+                            command.Parameters.AddWithValue("@GrowthRate", growthRate);
+                            await command.ExecuteNonQueryAsync();
+                        }
 
-                // Insert Season data
-                string seasonQuery = "INSERT INTO Season (SeasonName, FertileCrops, InfertileCrops, Duration) VALUES (@Name, @Fertile, @Infertile, @Duration); SELECT SCOPE_IDENTITY();";
-                int seasonId;
-                using (var command = new SqlCommand(seasonQuery, connection))
-                {
-                    command.Parameters.AddWithValue("@Name", seasonName);
-                    command.Parameters.AddWithValue("@Fertile", fertileCrops);
-                    command.Parameters.AddWithValue("@Infertile", infertileCrops);
-                    command.Parameters.AddWithValue("@Duration", seasonDuration);
-                    seasonId = Convert.ToInt32(await command.ExecuteScalarAsync());
-                }
+                        // Get next CropID
+                        string getMaxCropIDQuery = "SELECT ISNULL(MAX(CropID), 0) FROM Crops;";
+                        int nextCropID;
+                        using (var command = new SqlCommand(getMaxCropIDQuery, connection, transaction))
+                        {
+                            nextCropID = Convert.ToInt32(await command.ExecuteScalarAsync()) + 1;
+                        }
 
-                // Insert Market data
-                string marketQuery = "INSERT INTO Market (PurchasingPrice, SellingPrice, ItemID) VALUES (@BuyPrice, @SellPrice, @ItemID); SELECT SCOPE_IDENTITY();";
-                int marketId;
-                using (var command = new SqlCommand(marketQuery, connection))
-                {
-                    command.Parameters.AddWithValue("@BuyPrice", purchasePrice);
-                    command.Parameters.AddWithValue("@SellPrice", sellingPrice);
-                    command.Parameters.AddWithValue("@ItemID", marketItemId);
-                    marketId = Convert.ToInt32(await command.ExecuteScalarAsync());
-                }
+                        // Insert Crop using existing SeasonID
+                        string cropQuery = "INSERT INTO Crops (CropID, CropName, GrowthID, FertilizerID, SeasonID, MarketID) VALUES (@CropID, @Name, @GrowthID, @FertilizerID, @SeasonID, @MarketID)";
+                        using (var command = new SqlCommand(cropQuery, connection, transaction))
+                        {
+                            command.Parameters.AddWithValue("@CropID", nextCropID);
+                            command.Parameters.AddWithValue("@Name", cropName);
+                            command.Parameters.AddWithValue("@GrowthID", nextGrowthID);
+                            command.Parameters.AddWithValue("@FertilizerID", selectedFertilizerId);
+                            command.Parameters.AddWithValue("@SeasonID", selectedSeasonId);
+                            command.Parameters.AddWithValue("@MarketID", selectedMarketId);
+                            await command.ExecuteNonQueryAsync();
+                        }
 
-                // Finally, insert the Crop data
-                string cropQuery = "INSERT INTO Crops (CropName, GrowthID, FertilizerID, SeasonID, MarketID) VALUES (@Name, @GrowthID, @FertilizerID, @SeasonID, @MarketID)";
-                using (var command = new SqlCommand(cropQuery, connection))
-                {
-                    command.Parameters.AddWithValue("@Name", cropName);
-                    command.Parameters.AddWithValue("@GrowthID", growthId);
-                    command.Parameters.AddWithValue("@FertilizerID", fertilizerId);
-                    command.Parameters.AddWithValue("@SeasonID", seasonId);
-                    command.Parameters.AddWithValue("@MarketID", marketId);
-                    await command.ExecuteNonQueryAsync();
+                        transaction.Commit();
+                        ClearInputs();
+                        await RefreshData();
+                    }
+                    catch (Exception)
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
                 }
             }
         }
@@ -267,15 +400,13 @@ public class CropAdminPanel : BaseAdminPanel
     {
         cropName = "";
         growthRate = 1.0f;
-        fertilizerName = "";
-        fertilizerBuff = 0f;
-        fertilizerItemId = 0;
-        seasonName = "";
+        seasonDuration = 30;
         fertileCrops = "";
         infertileCrops = "";
-        seasonDuration = 30;
-        purchasePrice = 0m;
-        sellingPrice = 0m;
-        marketItemId = 0;
+        seasonColorR = 255;
+        seasonColorG = 255;
+        seasonColorB = 255;
+        selectedFertilizerId = 1;
+        selectedMarketId = 1;
     }
 }
