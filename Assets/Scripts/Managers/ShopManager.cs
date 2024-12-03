@@ -12,7 +12,7 @@ public class ShopManager : MonoBehaviour {
     [SerializeField]    public Button _returnButton;
     [SerializeField]    public TMP_Text _purchaseMessage;
     
-    void OnAwake() {
+    void Awake() {
         if (Instance == null) {
             Instance = this;
         }
@@ -55,8 +55,8 @@ public class ShopManager : MonoBehaviour {
         if(this.CheckPurchase(cropPrice)) {
             InventoryManager.Instance.StoreBoughtItem(seedID, this.RandomizeQuality());
             Debug.Log("Success");
-            this._purchaseMessage.text = "Purchase of " + await DataRetriever.Instance.RetrieveCropName(seedID) + "seed successful.";
-            Logger.Instance.LogMessage("Purchase of " + await DataRetriever.Instance.RetrieveCropName(seedID) + "seed successful.");
+            this._purchaseMessage.text = "Purchase of " + await DataRetriever.Instance.RetrieveCropName(seedID) + " seed successful.";
+            Logger.Instance.LogMessage("Purchase of " + await DataRetriever.Instance.RetrieveCropName(seedID) + " seed successful.");
         }
         else {
             Debug.Log("Fail");
