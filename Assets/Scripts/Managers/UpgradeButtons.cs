@@ -8,6 +8,9 @@ public class UpgradeButtons : MonoBehaviour {
     [SerializeField]
     TMP_Text shopMessage;
     [SerializeField]    public List<Button> _upgradeButtons;
+    public static event Action<float> OnLuckyCharmBought;
+    private float rarityBuffFactor = 1.25f;
+    public static event Action<float> OnGrowthTimeUpgrade;
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -35,6 +38,7 @@ public class UpgradeButtons : MonoBehaviour {
         int price = await DataRetriever.Instance.RetrieveCropPurchasingPrice(18);
         if(this.CheckPurchase(price)) {
             UpgradeManager.Instance.LuckyCharm();
+            OnLuckyCharmBought?.Invoke(this.rarityBuffFactor);
             this.shopMessage.text = "Rarity Boosted!";
             this._upgradeButtons[0].interactable = false;
         }
@@ -48,6 +52,7 @@ public class UpgradeButtons : MonoBehaviour {
         int price = await DataRetriever.Instance.RetrieveCropPurchasingPrice(19);
         if(this.CheckPurchase(price)) {
             UpgradeManager.Instance.Pesticide();
+            OnGrowthTimeUpgrade?.Invoke(0.2f);
             this.shopMessage.text = "Fertilizer Boosted!";
             this._upgradeButtons[1].interactable = false;
         }
@@ -61,6 +66,7 @@ public class UpgradeButtons : MonoBehaviour {
         int price = await DataRetriever.Instance.RetrieveCropPurchasingPrice(20);
         if(this.CheckPurchase(price)) {
             UpgradeManager.Instance.Earthworms();
+            OnGrowthTimeUpgrade?.Invoke(0.4f);
             this.shopMessage.text = "Fertilizer Boosted!";
             this._upgradeButtons[2].interactable = false;
         }
