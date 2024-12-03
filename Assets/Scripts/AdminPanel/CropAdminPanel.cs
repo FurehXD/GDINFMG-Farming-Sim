@@ -25,6 +25,10 @@ public class CropAdminPanel : BaseAdminPanel
     private List<(int id, string name)> existingSeasons = new List<(int id, string name)>();
     private int selectedSeasonId = 1;
 
+    private bool isEditing = false;
+    private int editingCropId = -1;
+    private DataRow selectedRow;
+
     protected override void Awake()
     {
         base.Awake();
@@ -149,17 +153,32 @@ public class CropAdminPanel : BaseAdminPanel
             GUILayout.BeginHorizontal(backgroundStyle);
             foreach (DataColumn column in currentData.Columns)
             {
-                GUILayout.Label(column.ColumnName, labelStyle, GUILayout.Width(120));
+                if (!column.ColumnName.EndsWith("ID")) // Skip ID columns from display
+                {
+                    GUILayout.Label(column.ColumnName, labelStyle, GUILayout.Width(120));
+                }
             }
+            GUILayout.Label("Actions", labelStyle, GUILayout.Width(100));
             GUILayout.EndHorizontal();
 
             // Display Data
             foreach (DataRow row in currentData.Rows)
             {
                 GUILayout.BeginHorizontal(backgroundStyle);
-                foreach (var item in row.ItemArray)
+                foreach (DataColumn column in currentData.Columns)
                 {
-                    GUILayout.Label(item.ToString(), labelStyle, GUILayout.Width(120));
+                    if (!column.ColumnName.EndsWith("ID")) // Skip ID columns from display
+                    {
+                        GUILayout.Label(row[column].ToString(), labelStyle, GUILayout.Width(120));
+                    }
+                }
+
+                if (!isEditing || editingCropId != Convert.ToInt32(row["CropID"]))
+                {
+                    if (GUILayout.Button("Edit", buttonStyle, GUILayout.Width(100)))
+                    {
+                        StartEditing(row);
+                    }
                 }
                 GUILayout.EndHorizontal();
             }
@@ -172,30 +191,43 @@ public class CropAdminPanel : BaseAdminPanel
 
     private void DisplayAddNewCropSection()
     {
-        GUILayout.Box("Add New Crop", backgroundStyle, GUILayout.ExpandWidth(true));
-
         GUILayout.BeginVertical(backgroundStyle);
 
-        try
+        GUILayout.Box(isEditing ? "Edit Crop" : "Add New Crop", backgroundStyle, GUILayout.ExpandWidth(true));
+
+        cropName = DrawInputField("Crop Name:", cropName);
+        growthRate = DrawFloatField("Growth Rate:", growthRate);
+
+        DisplayFertilizerSection();
+        DisplaySeasonSection();
+        DisplayMarketSection();
+
+        GUI.enabled = !isOperationInProgress;
+
+        GUILayout.BeginHorizontal();
+        if (isEditing)
         {
-            cropName = DrawInputField("Crop Name:", cropName);
-            growthRate = DrawFloatField("Growth Rate:", growthRate);
-
-            DisplayFertilizerSection();
-            DisplaySeasonSection();
-            DisplayMarketSection();
-
-            GUI.enabled = !isOperationInProgress;
+            if (GUILayout.Button("Update Crop", buttonStyle))
+            {
+                ProcessAsyncOperation(UpdateCrop());
+            }
+            if (GUILayout.Button("Cancel", buttonStyle))
+            {
+                CancelEditing();
+            }
+        }
+        else
+        {
             if (GUILayout.Button("Add Crop", buttonStyle))
             {
                 ProcessAsyncOperation(InsertCrop());
             }
-            GUI.enabled = true;
         }
-        finally
-        {
-            GUILayout.EndVertical();
-        }
+        GUILayout.EndHorizontal();
+
+        GUI.enabled = true;
+
+        GUILayout.EndVertical();
     }
 
     private void DisplayFertilizerSection()
@@ -295,6 +327,7 @@ public class CropAdminPanel : BaseAdminPanel
                 await connection.OpenAsync();
                 string query = @"
                     SELECT 
+                        c.CropID,
                         c.CropName,
                         g.GrowthRate,
                         f.FertilizerName,
@@ -304,7 +337,10 @@ public class CropAdminPanel : BaseAdminPanel
                         s.InfertileCrops,
                         s.Duration as SeasonDuration,
                         m.PurchasingPrice,
-                        m.SellingPrice
+                        m.SellingPrice,
+                        c.FertilizerID,
+                        c.SeasonID,
+                        c.MarketID
                     FROM Crops c
                     JOIN Growth g ON c.GrowthID = g.GrowthID
                     JOIN Fertilizer f ON c.FertilizerID = f.FertilizerID
@@ -396,10 +432,99 @@ public class CropAdminPanel : BaseAdminPanel
         }
     }
 
+    private async Task UpdateCrop()
+    {
+        try
+        {
+            using (var connection = new SqlConnection(DatabaseManager.Instance.ConnectionString))
+            {
+                await connection.OpenAsync();
+
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        // Update Growth data
+                        string growthQuery = @"
+                            UPDATE Growth 
+                            SET GrowthRate = @GrowthRate 
+                            WHERE GrowthID = (
+                                SELECT GrowthID 
+                                FROM Crops 
+                                WHERE CropID = @CropID
+                            )";
+
+                        using (var command = new SqlCommand(growthQuery, connection, transaction))
+                        {
+                            command.Parameters.AddWithValue("@GrowthRate", growthRate);
+                            command.Parameters.AddWithValue("@CropID", editingCropId);
+                            await command.ExecuteNonQueryAsync();
+                        }
+
+                        // Update Crop data
+                        string cropQuery = @"
+                            UPDATE Crops 
+                            SET CropName = @Name,
+                                FertilizerID = @FertilizerID,
+                                SeasonID = @SeasonID,
+                                MarketID = @MarketID
+                            WHERE CropID = @CropID";
+
+                        using (var command = new SqlCommand(cropQuery, connection, transaction))
+                        {
+                            command.Parameters.AddWithValue("@CropID", editingCropId);
+                            command.Parameters.AddWithValue("@Name", cropName);
+                            command.Parameters.AddWithValue("@FertilizerID", selectedFertilizerId);
+                            command.Parameters.AddWithValue("@SeasonID", selectedSeasonId);
+                            command.Parameters.AddWithValue("@MarketID", selectedMarketId);
+                            await command.ExecuteNonQueryAsync();
+                        }
+
+                        transaction.Commit();
+                        CancelEditing();
+                        await RefreshData();
+                    }
+                    catch (Exception)
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Error updating crop: {e.Message}");
+            throw;
+        }
+    }
+
+    private void CancelEditing()
+    {
+        isEditing = false;
+        editingCropId = -1;
+        selectedRow = null;
+        ClearInputs();
+    }
+
+    private void StartEditing(DataRow row)
+    {
+        isEditing = true;
+        editingCropId = Convert.ToInt32(row["CropID"]);
+        selectedRow = row;
+
+        // Populate fields with current values
+        cropName = row["CropName"].ToString();
+        growthRate = Convert.ToSingle(row["GrowthRate"]);
+        selectedFertilizerId = Convert.ToInt32(row["FertilizerID"]);
+        selectedSeasonId = Convert.ToInt32(row["SeasonID"]);
+        selectedMarketId = Convert.ToInt32(row["MarketID"]);
+    }
+
     private void ClearInputs()
     {
         cropName = "";
-        growthRate = 1.0f;
+        growthRate = 0.0f;
         seasonDuration = 30;
         fertileCrops = "";
         infertileCrops = "";

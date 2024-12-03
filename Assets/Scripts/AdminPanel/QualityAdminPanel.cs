@@ -8,6 +8,9 @@ public class QualityAdminPanel : BaseAdminPanel
 {
     private string qualityName = "";
     private float qualityGrowthBuff = 0f;
+    private bool isEditing = false;
+    private int editingQualityId = -1;
+    private DataRow selectedRow;
 
     private void OnGUI()
     {
@@ -32,6 +35,21 @@ public class QualityAdminPanel : BaseAdminPanel
         }
 
         // Display current data
+        DisplayCurrentData();
+
+        // Add/Edit quality section
+        GUILayout.Space(20);
+        DisplayQualitySection();
+
+        // End the scroll view
+        GUILayout.EndScrollView();
+
+        // End the main area
+        GUILayout.EndArea();
+    }
+
+    private void DisplayCurrentData()
+    {
         GUILayout.Box("Current Qualities", GUILayout.ExpandWidth(true));
         if (currentData != null && currentData.Rows.Count > 0)
         {
@@ -41,6 +59,7 @@ public class QualityAdminPanel : BaseAdminPanel
             {
                 GUILayout.Box(column.ColumnName, GUILayout.Width(120));
             }
+            GUILayout.Box("Actions", GUILayout.Width(120));
             GUILayout.EndHorizontal();
 
             // Data rows
@@ -51,6 +70,15 @@ public class QualityAdminPanel : BaseAdminPanel
                 {
                     GUILayout.Box(item.ToString(), GUILayout.Width(120));
                 }
+
+                // Edit button
+                if (!isEditing || editingQualityId != Convert.ToInt32(row["ID"]))
+                {
+                    if (GUILayout.Button("Edit", GUILayout.Width(120)))
+                    {
+                        StartEditing(row);
+                    }
+                }
                 GUILayout.EndHorizontal();
             }
         }
@@ -58,12 +86,12 @@ public class QualityAdminPanel : BaseAdminPanel
         {
             GUILayout.Label("No data available");
         }
+    }
 
-        // Add new quality section
-        GUILayout.Space(20);
-        GUILayout.Box("Add New Quality", GUILayout.ExpandWidth(true));
+    private void DisplayQualitySection()
+    {
+        GUILayout.Box(isEditing ? "Edit Quality" : "Add New Quality", GUILayout.ExpandWidth(true));
 
-        // Input fields
         GUILayout.BeginVertical(GUI.skin.box);
 
         GUILayout.Label("Quality Name:");
@@ -74,19 +102,31 @@ public class QualityAdminPanel : BaseAdminPanel
         float.TryParse(buffString, out qualityGrowthBuff);
 
         GUI.enabled = !isOperationInProgress;
-        if (GUILayout.Button("Add Quality", GUILayout.Width(100)))
+
+        GUILayout.BeginHorizontal();
+        if (isEditing)
         {
-            ProcessAsyncOperation(InsertQuality());
+            if (GUILayout.Button("Update Quality", GUILayout.Width(100)))
+            {
+                ProcessAsyncOperation(UpdateQuality());
+            }
+            if (GUILayout.Button("Cancel", GUILayout.Width(100)))
+            {
+                CancelEditing();
+            }
         }
+        else
+        {
+            if (GUILayout.Button("Add Quality", GUILayout.Width(100)))
+            {
+                ProcessAsyncOperation(InsertQuality());
+            }
+        }
+        GUILayout.EndHorizontal();
+
         GUI.enabled = true;
 
         GUILayout.EndVertical();
-
-        // End the scroll view
-        GUILayout.EndScrollView();
-
-        // End the main area
-        GUILayout.EndArea();
     }
 
     protected override async Task RefreshData()
@@ -162,6 +202,65 @@ public class QualityAdminPanel : BaseAdminPanel
             throw;
         }
     }
+
+    private async Task UpdateQuality()
+    {
+        if (string.IsNullOrEmpty(qualityName))
+        {
+            throw new Exception("Quality name cannot be empty");
+        }
+
+        try
+        {
+            using (var connection = new SqlConnection(DatabaseManager.Instance.ConnectionString))
+            {
+                await connection.OpenAsync();
+
+                string updateQuery = @"
+                    UPDATE Quality 
+                    SET QualityName = @Name, 
+                        GrowthRateBuffPercentage = @Buff 
+                    WHERE QualityID = @ID";
+
+                using (var command = new SqlCommand(updateQuery, connection))
+                {
+                    command.Parameters.AddWithValue("@ID", editingQualityId);
+                    command.Parameters.AddWithValue("@Name", qualityName);
+                    command.Parameters.AddWithValue("@Buff", qualityGrowthBuff);
+                    await command.ExecuteNonQueryAsync();
+                }
+
+                Debug.Log($"Successfully updated quality: {qualityName}");
+                CancelEditing();
+                await RefreshData();
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Error updating quality: {e.Message}");
+            throw;
+        }
+    }
+
+    private void StartEditing(DataRow row)
+    {
+        isEditing = true;
+        editingQualityId = Convert.ToInt32(row["ID"]);
+        selectedRow = row;
+
+        // Populate fields with current values
+        qualityName = row["Name"].ToString();
+        qualityGrowthBuff = Convert.ToSingle(row["Growth Buff %"]);
+    }
+
+    private void CancelEditing()
+    {
+        isEditing = false;
+        editingQualityId = -1;
+        selectedRow = null;
+        ClearInputs();
+    }
+
 
     private void ClearInputs()
     {
