@@ -40,7 +40,6 @@ public class PlotAreaRetriever : MonoBehaviour
     private void Update()
     {
         List<PlotArea> tempHolder = new List<PlotArea>();
-
         tempHolder = this.RetrievePlotAreas();
 
         this.PlotAreaDataHasChanged = tempHolder != this.AvailablePlotAreas;

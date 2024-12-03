@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using TMPro;
 using UnityEngine;
 
@@ -8,12 +9,28 @@ public class PlotAreaBroadcaster : MonoBehaviour
     private string currentPlotName;
 
     public static event Action<string> OnPlotAreaChanged;
-    private void Start()
+
+    private DropdownBehavior dropdownBehavior;
+    private void Awake()
     {
         this.plotDropdown = this.GetComponent<TMP_Dropdown>();
+        this.dropdownBehavior = this.GetComponent<DropdownBehavior>();
+    }
+    private void Start()
+    {
+        StartCoroutine(this.SetCurrentPlotName());
+    }
 
-        if(this.plotDropdown && PlotAreaRetriever.Instance)
+    private IEnumerator SetCurrentPlotName()
+    {
+        yield return new WaitUntil(()=> dropdownBehavior.PlotDropdown != null);
+        yield return new WaitUntil(()=> dropdownBehavior.PlotDropdown.options.Count > 0);
+
+        if (this.plotDropdown && this.dropdownBehavior)
+        {
+            Debug.Log("here: " + this.plotDropdown.options[this.plotDropdown.value].text);
             PlotAreaRetriever.Instance.SetCurrentPlotName(this.plotDropdown.options[this.plotDropdown.value].text);
+        }
     }
     public void AcquireChangedPlot()
     {

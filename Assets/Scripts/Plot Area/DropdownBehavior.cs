@@ -6,6 +6,7 @@ using UnityEngine;
 public class DropdownBehavior : MonoBehaviour
 {
     private TMP_Dropdown plotDropdown;
+    public TMP_Dropdown PlotDropdown { get { return plotDropdown; } }
     private void Start()
     {
         this.plotDropdown = this.GetComponent<TMP_Dropdown>();
@@ -15,6 +16,8 @@ public class DropdownBehavior : MonoBehaviour
     }
     private void Update()
     {
+        if (plotDropdown && PlotAreaRetriever.Instance.AvailablePlotAreas != null)
+            this.UpdateDropDown();
     }
     private void UpdateDropDown()
     {
