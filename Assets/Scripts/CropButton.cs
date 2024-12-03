@@ -1,4 +1,7 @@
+using System.Drawing;
 using UnityEngine;
+using UnityEngine.UI;
+using Image = UnityEngine.UI.Image;
 
 public class CropButton : BaseButton{
     [SerializeField]
@@ -12,6 +15,25 @@ public class CropButton : BaseButton{
     public int CropID {
         get { return this.cropID; }
         set { this.cropID = value; }
+    }
+
+    [SerializeField]
+    private Image _cropIcon;
+
+    protected override void Start() {
+        base.Start();
+        this.SetCropImage();
+    }
+
+    private async void SetCropImage() {
+        string cropAssetDirectory = await DataRetriever.Instance.RetrieveCropAssetDirectory(cropID);
+        this._cropIcon.sprite = Resources.Load<Sprite>(cropAssetDirectory);
+    }
+
+    protected override void PerformClick()
+    {
+        base.PerformClick();
+        ShopManager.Instance.BuySeed(this.cropID);
     }
 
     public void SelectCrop() {
