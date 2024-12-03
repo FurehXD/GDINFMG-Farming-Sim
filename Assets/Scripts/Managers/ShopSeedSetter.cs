@@ -13,39 +13,43 @@ public class ShopSeedSetter : MonoBehaviour
     private List<CropButton> seedReferences = new();
 
     private TMP_Dropdown areaSelectorDropdown;
-    private List<PlotArea> plots;
-    private int maxSeedID = 12;//the last num for seeds in the market table
+    private int maxSeedID = 16;//the last num for seeds in the market table
 
     private void Start()
     {
         this.areaSelectorDropdown = this.GetComponentInChildren<TMP_Dropdown>();
-        this.plots = DataRetriever.Instance.RetrievePlotAreas();
+        //this.plots = DataRetriever.Instance.RetrievePlotAreas();
         this.UpdateGameLocation();
     }
     private void Update()
     {
-        this.plots = DataRetriever.Instance.RetrievePlotAreas();
+        //
     }
     public void UpdateGameLocation()
     {
         this.ResetPlots();
 
-        string currentPlotAreaString = this.areaSelectorDropdown.options[this.areaSelectorDropdown.value].text;
-
-        PlotArea currentPlotArea = this.plots.Find(plotName => plotName.PlotName == currentPlotAreaString);
-
-        if (currentPlotArea != null && this.cropTemplate != null)
+        //string currentPlotAreaString = this.areaSelectorDropdown.options[this.areaSelectorDropdown.value].text;
+    
+        if (this.cropTemplate != null && this.seedArea != null)
         {
-            float areaSizeTemp = currentPlotArea.GridSize.x * currentPlotArea.GridSize.y;
-            int areaSize = (int)areaSizeTemp;
+            int areaSize = maxSeedID;  // Consider getting this from database instead
 
-            for(int i = 1; i<this.maxSeedID + 1; i++)
+            Debug.Log($"Starting seed instantiation with areaSize: {areaSize}");
+
+            for(int i = 1; i <= areaSize; i++)
             {
                 if(this.seedArea)
+                {
                     this.seedReferences.Add(Instantiate(this.cropTemplate, this.seedArea.transform));
-                    this.seedReferences[i].CropID = i;
+                    this.seedReferences[i-1].CropID = i;
+                    Debug.Log($"Instantiating seed number: {i}");
+                }
             }
-
+        }
+        else
+        {
+            Debug.LogWarning("cropTemplate or seedArea not initialized");
         }
     }
     private void ResetPlots()

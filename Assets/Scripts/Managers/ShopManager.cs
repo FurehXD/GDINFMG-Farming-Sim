@@ -8,7 +8,6 @@ public class ShopManager : MonoBehaviour {
     public static ShopManager Instance;
     [SerializeField]    public List<Button> _cropButtons;
     [SerializeField]    public List<Button> _fertilizerButtons;
-    [SerializeField]    public List<Button> _upgradeButtons;
     [SerializeField]    public Button _confirmButton;
     [SerializeField]    public Button _returnButton;
     [SerializeField]    public TMP_Text _purchaseMessage;
@@ -56,10 +55,12 @@ public class ShopManager : MonoBehaviour {
             InventoryManager.Instance.StoreBoughtItem(seedID, this.RandomizeQuality());
             Debug.Log("Success");
             this._purchaseMessage.text = "Purchase of " + await DataRetriever.Instance.RetrieveCropName(seedID) + "seed successful.";
+            Logger.Instance.LogMessage("Purchase of " + await DataRetriever.Instance.RetrieveCropName(seedID) + "seed successful.");
         }
         else {
             Debug.Log("Fail");
             this._purchaseMessage.text = "Purchase failure, not enough money.";
+            Logger.Instance.LogMessage("Purchase failed");
         }
         
     }
