@@ -50,6 +50,7 @@ public class ShopManager : MonoBehaviour {
     public async void BuySeed(int seedID) {
         //get item form database using id
         //add crop to inventory
+        Debug.Log("Attempting to buy thingy.");
         int cropPrice = await DataRetriever.Instance.RetrieveCropPurchasingPrice(seedID);
         if(this.CheckPurchase(cropPrice)) {
             InventoryManager.Instance.StoreBoughtItem(seedID, this.RandomizeQuality());
