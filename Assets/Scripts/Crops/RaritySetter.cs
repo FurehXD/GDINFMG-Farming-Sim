@@ -18,7 +18,9 @@ public class RaritySetter : MonoBehaviour
     private bool isLoading = false;
 
     [SerializeField]
-    private float seasonRarityMultiplier = 2f;
+    private float seasonRarityMultiplierFertile = 2f;
+    [SerializeField]
+    private float seasonRarityMultiplierInFertile = 0.5f;
 
     private async void Start()
     {
@@ -87,7 +89,10 @@ public class RaritySetter : MonoBehaviour
         float randomNumber = UnityEngine.Random.Range(0.01f, 1);
         this.cropComponentReference = cropComponentReference;
 
-        this.UpdateHighestRarity(this.seasonRarityMultiplier);
+        if(this.IsFertileInCurrentSeason())
+            this.UpdateHighestRarity(this.seasonRarityMultiplierFertile);
+        else if(this.IsInfertileInCurrentSeason())
+            this.UpdateHighestRarity(this.seasonRarityMultiplierInFertile);
 
         foreach (Rarity rarity in rarities)
         {

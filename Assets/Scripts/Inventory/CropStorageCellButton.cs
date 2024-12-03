@@ -14,6 +14,8 @@ public class CropStorageCellButton : BaseButton
     [SerializeField]
     private SubCropStorageCellButton subCellPrefabTemplate;
 
+    private bool firstTimeInitialized = true;
+
     private VerticalLayoutGroup childLayoutGroup;
     private List<SubCropStorageCellButton> childButtonReferences = new();
 
@@ -23,6 +25,11 @@ public class CropStorageCellButton : BaseButton
     public int CropIDItStores {  get { return this.cropIDItStores; } }
 
     private Crop cropItStores;
+
+    private Dictionary<int, int> cropQuantities = new();
+
+    [SerializeField]
+    private int startingQuantities = 1;
 
     public static event Action<CropStorageCellButton> OnCropStorageCellButtonClicked;
     protected override void OnEnable()
@@ -51,6 +58,7 @@ public class CropStorageCellButton : BaseButton
         this.childLayoutGroup = this.transform.GetComponentInChildren<VerticalLayoutGroup>();   
         this.interactable = false;
         this.cropItStores = this.GetComponentInChildren<Crop>();
+
     }
     protected override void Update()
     {
@@ -80,9 +88,22 @@ public class CropStorageCellButton : BaseButton
             foreach (QualityData qualityData in availableQualities)
             {
                 SubCropStorageCellButton subCropStorageCellButton = Instantiate(this.subCellPrefabTemplate, this.childLayoutGroup.transform);
-                subCropStorageCellButton.Initialize(qualityData, this.cropItStores, this);
+
+                if (firstTimeInitialized)
+                {
+                    subCropStorageCellButton.Initialize(qualityData, this.cropItStores, this, startingQuantities);
+
+                    this.cropQuantities.Add(qualityData.QualityID, startingQuantities);
+                }
+                else
+                {
+                    subCropStorageCellButton.Initialize(qualityData, this.cropItStores, this, this.cropQuantities[qualityData.QualityID]);
+                }
                 this.childButtonReferences.Add(subCropStorageCellButton);
             }
+
+            this.firstTimeInitialized = false;
+            
             OnCropStorageCellButtonClicked?.Invoke(this);
             this.subStorageIsOpen = true;
         }
@@ -90,6 +111,11 @@ public class CropStorageCellButton : BaseButton
         {
             Debug.LogError("Failed to retrieve qualities from database");
         }
+    }
+
+    public void ConsumeSeed(QualityData associatedQuality)
+    {
+        this.cropQuantities[associatedQuality.QualityID]--;
     }
     public void CloseSubStorageCells()
     {
