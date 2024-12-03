@@ -8,7 +8,6 @@ public class ShopManager : MonoBehaviour {
     public static ShopManager Instance;
     [SerializeField]    public List<Button> _cropButtons;
     [SerializeField]    public List<Button> _fertilizerButtons;
-    [SerializeField]    public List<Button> _upgradeButtons;
     [SerializeField]    public Button _confirmButton;
     [SerializeField]    public Button _returnButton;
     [SerializeField]    public TMP_Text _purchaseMessage;

@@ -8,6 +8,7 @@ public class UpgradeButtons : MonoBehaviour {
     [SerializeField]
     TMP_Text shopMessage;
     [SerializeField]    public List<Button> _upgradeButtons;
+    [SerializeField]    public List<Image> _upgradeImages;
     public static event Action<float> OnLuckyCharmBought;
     private float rarityBuffFactor = 1.25f;
     public static event Action<float> OnGrowthTimeUpgrade;
@@ -15,12 +16,21 @@ public class UpgradeButtons : MonoBehaviour {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+        this.SetUpgradeImage(24, 29);
     }
 
     // Update is called once per frame
     void Update()
     {
+        
+    }
+
+    private async void SetUpgradeImage(int minId, int maxID) {
+        for(int i = minId; i <= maxID; i++) {
+            string upgradeAssetDirectory = await DataRetriever.Instance.RetrieveCropAssetDirectory(i);
+            this._upgradeImages[i-minId].sprite = Resources.Load<Sprite>(upgradeAssetDirectory);
+            Debug.Log("Yo mama" + i + " " + upgradeAssetDirectory);
+        }
         
     }
 
@@ -35,7 +45,7 @@ public class UpgradeButtons : MonoBehaviour {
     }
 
     public async void LuckyCharm() {
-        int price = await DataRetriever.Instance.RetrieveCropPurchasingPrice(18);
+        int price = await DataRetriever.Instance.RetrieveCropPurchasingPrice(24);
         if(this.CheckPurchase(price)) {
             UpgradeManager.Instance.LuckyCharm();
             OnLuckyCharmBought?.Invoke(this.rarityBuffFactor);
@@ -51,7 +61,7 @@ public class UpgradeButtons : MonoBehaviour {
     }
 
     public async void Pesticide() {
-        int price = await DataRetriever.Instance.RetrieveCropPurchasingPrice(19);
+        int price = await DataRetriever.Instance.RetrieveCropPurchasingPrice(25);
         if(this.CheckPurchase(price)) {
             UpgradeManager.Instance.Pesticide();
             OnGrowthTimeUpgrade?.Invoke(0.2f);
@@ -67,7 +77,7 @@ public class UpgradeButtons : MonoBehaviour {
     }
 
     public async void Earthworms() {
-        int price = await DataRetriever.Instance.RetrieveCropPurchasingPrice(20);
+        int price = await DataRetriever.Instance.RetrieveCropPurchasingPrice(26);
         if(this.CheckPurchase(price)) {
             UpgradeManager.Instance.Earthworms();
             OnGrowthTimeUpgrade?.Invoke(0.4f);
@@ -83,7 +93,7 @@ public class UpgradeButtons : MonoBehaviour {
     }
 
     public async void MarketConnection() {
-        int price = await DataRetriever.Instance.RetrieveCropPurchasingPrice(21);
+        int price = await DataRetriever.Instance.RetrieveCropPurchasingPrice(27);
         if(this.CheckPurchase(price)) {
             UpgradeManager.Instance.MarketConnection();
             this.shopMessage.text = "Sell Value Boosted!";
@@ -98,7 +108,7 @@ public class UpgradeButtons : MonoBehaviour {
     }
 
     public async void Advertisement() {
-        int price = await DataRetriever.Instance.RetrieveCropPurchasingPrice(18);
+        int price = await DataRetriever.Instance.RetrieveCropPurchasingPrice(28);
         if(this.CheckPurchase(price)) {
             UpgradeManager.Instance.Advertisement();
             this.shopMessage.text = "Sell Value Boosted!";
@@ -113,7 +123,7 @@ public class UpgradeButtons : MonoBehaviour {
     }
 
     public async void ChemicalInjection() {
-        int price = await DataRetriever.Instance.RetrieveCropPurchasingPrice(18);
+        int price = await DataRetriever.Instance.RetrieveCropPurchasingPrice(29);
         if(this.CheckPurchase(price)) {
             UpgradeManager.Instance.ChemicalInjection();
             this.shopMessage.text = "Yield Doubled!";
