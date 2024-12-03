@@ -7,6 +7,7 @@ public class UpgradeButtons : MonoBehaviour {
     [SerializeField]
     TMP_Text shopMessage;
     [SerializeField]    public List<Button> _upgradeButtons;
+    
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {

@@ -11,6 +11,7 @@ public class CropButton : BaseButton{
     private int cropID;
     public int CropID {
         get { return this.cropID; }
+        set { this.cropID = value; }
     }
 
     public void SelectCrop() {
