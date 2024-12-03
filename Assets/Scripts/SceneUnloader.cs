@@ -16,6 +16,7 @@ public class SceneUnloader : MonoBehaviour
     }
 
     public void CloseShop() {
-        SceneManager.UnloadSceneAsync("ShopScene");
+        //SceneManager.UnloadSceneAsync("ShopScene");
+        SceneLoad.Instance.CloseShop();
     }
 }

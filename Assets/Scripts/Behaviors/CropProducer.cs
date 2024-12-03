@@ -49,6 +49,7 @@ public class CropProducer : MonoBehaviour
     private IEnumerator Produce()
     {
         float growthTime = this.CalculateGrowthTime();
+        float baseGrowthTime = growthTime;
 
         this.pulserReference.StartPulsing();
 
@@ -62,6 +63,7 @@ public class CropProducer : MonoBehaviour
         this.pulserReference.StopPulsing();
         this.cropComponentReference.RarityID = this.raritySetter.DetermineRarity(this.cropComponentReference);
 
+        Logger.Instance.LogMessage(this.cropComponentReference.CropName + " finished production at " + baseGrowthTime + "s");
         OnReadyForHarvest.Invoke();
     }
 
@@ -77,5 +79,9 @@ public class CropProducer : MonoBehaviour
 
         Debug.Log("GROWTH TIME Of " + this.cropComponentReference.CropName + " IS " + growthTime + "s");
         return growthTime;
+    }
+    public void UpdateGrowthTime(float growthTimeFactor)
+    {
+        this.growthRate *= growthTimeFactor;
     }
 }

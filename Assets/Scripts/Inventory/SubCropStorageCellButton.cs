@@ -18,11 +18,15 @@ public class SubCropStorageCellButton : BaseButton
     private int quantity = 1;
     private TextMeshProUGUI quantityTMPDisplay;
 
-    public void Initialize(QualityData quality, Crop storingCrop, CropStorageCellButton parentCreator)
+    public void Initialize(QualityData quality, Crop storingCrop, CropStorageCellButton parentCreator, int quantity)
     {
-        this.quality = quality; 
-        this.cropItStores = storingCrop;
+        if (!this.cropItStores)
+            cropItStores = this.GetComponentInChildren<Crop>();
+
+        this.quality = quality;
+        this.cropItStores.CropID = storingCrop.CropID;
         this.parentCreator = parentCreator;
+        this.quantity = quantity;
 
         this.GetComponentInChildren<IconApplier>().ApplyIcon(this.cropItStores.CropIcon);
         QualitySetter qualityIndicatorComponent = this.GetComponentInChildren<QualitySetter>();
@@ -44,6 +48,7 @@ public class SubCropStorageCellButton : BaseButton
             Debug.LogError(this.name + "  was not initialized!");
 
         this.quantityTMPDisplay = this.GetComponentInChildren<TextMeshProUGUI>();
+        this.cropItStores = this.GetComponentInChildren<Crop>();
     }
     protected override void Update()
     {
@@ -60,6 +65,8 @@ public class SubCropStorageCellButton : BaseButton
 
         if (this.quantity < 0)
             this.quantity = 0;
+
+        this.parentCreator.ConsumeSeed(this.quality);
     }
     public void SignalStartProduction()
     {

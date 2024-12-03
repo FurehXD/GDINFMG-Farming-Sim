@@ -10,7 +10,7 @@ public class Rarity
     private float priceBuffPercentage;
     public float PriceBuffPercentage { get { return this.priceBuffPercentage; } }
     private float rarityProbability;
-    public float RarityProbability { get { return this.rarityProbability; } }
+    public float RarityProbability { get { return this.rarityProbability; } set { this.rarityProbability = value; } }
 
     private Color rarityColor;
     public Color RarityColor { get { return this.rarityColor; } }   

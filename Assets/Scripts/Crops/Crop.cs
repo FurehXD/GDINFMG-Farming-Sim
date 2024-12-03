@@ -37,7 +37,7 @@ public class Crop : MonoBehaviour
             try
             {
                 cropName = await DataRetriever.Instance.RetrieveCropName(cropID);
-                cropAssetDirectory = DataRetriever.Instance.RetrieveCropAssetDirectoryTemp(cropID);
+                cropAssetDirectory = await DataRetriever.Instance.RetrieveCropAssetDirectory(cropID);
                 cropIcon = Resources.Load<Sprite>(cropAssetDirectory);
                 growthID = await DataRetriever.Instance.RetrieveCropGrowthID(cropID);
                 growthRate = await DataRetriever.Instance.RetrieveCropGrowthRate(growthID);
