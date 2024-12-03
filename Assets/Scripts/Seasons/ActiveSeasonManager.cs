@@ -67,5 +67,6 @@ public class ActiveSeasonManager : MonoBehaviour
             SeasonProgression.Instance.StartSeasonProgression();
         }
         this.ActiveSeason = Seasons[this.currentSeasonIndex];
+        Logger.Instance.LogMessage("SEASON CHANGED TO " + this.ActiveSeason.SeasonName.ToUpper());
     }
 }
